@@ -12,8 +12,8 @@ import SandboxBanner            from '../../../components/SandboxBanner';
 const LeafletMap = dynamic(() => import('../../../components/AdminLeafletMap'), {
   ssr:     false,
   loading: () => (
-    <div className="h-[500px] bg-gray-100 rounded-xl flex items-center justify-center">
-      <span className="text-sm text-gray-400 animate-pulse">Loading map…</span>
+    <div className="h-[500px] bg-slate-100 rounded-xl flex items-center justify-center">
+      <span className="text-sm text-[var(--grey-text-dark)] animate-pulse">Loading map…</span>
     </div>
   ),
 });
@@ -106,35 +106,54 @@ export default function AdminMapPage() {
   }, [role, token]);
  
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen text-white bg-[var(--main-dark-bg)] w-full relative overflow-hidden">
       <SandboxBanner demoMode={DEMO_MODE} />
- 
-      <div className="p-4 max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Live complaint map</h2>
+
+      {/* Background Mesh Gradient */}
+      <div className="absolute inset-x-0 top-[-10%] h-[800px] w-full pointer-events-none opacity-50 z-0">
+        <div className="absolute top-0 right-[15%] w-[600px] h-[600px] rounded-full bg-[var(--purple)] blur-[120px] mix-blend-screen opacity-50" />
+        <div className="absolute top-[10%] left-[10%] w-[500px] h-[500px] rounded-full bg-[var(--blue)] blur-[100px] mix-blend-screen opacity-40" />
+        <div className="absolute top-[30%] left-[40%] w-[400px] h-[400px] rounded-full bg-[var(--pink)] blur-[120px] mix-blend-screen opacity-30" />
+        <div className="absolute top-[-5%] left-[30%] w-[400px] h-[400px] rounded-full bg-[var(--orange)] blur-[100px] mix-blend-screen opacity-20" />
+      </div>
+  
+      <div className="relative z-10 p-4 md:p-8 max-w-7xl mx-auto mt-6">
+        {/* Deep translucent background with heavy blur to reveal the mesh underneath */}
+        <div className="bg-[#1a1326]/40 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-6 md:p-8 backdrop-blur-2xl">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <img src="/logo.png" alt="ResolveX" className="w-12 h-12 object-contain drop-shadow-sm" />
+              <div>
+                <h2 className="text-2xl font-extrabold text-white tracking-tight" style={{ letterSpacing: '-0.02vw' }}>Live GIS Intelligence</h2>
+                <span className="text-sm text-[var(--grey-text-dark)]">City-wide incident visualization</span>
+              </div>
+            </div>
+            {DEMO_MODE && role === 'commissioner' && (
+              <button
+                onClick={handleDemoReset}
+                disabled={resetting}
+                className="px-6 py-2.5 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 text-sm
+                           font-semibold rounded-full transition-all disabled:opacity-50 shadow-sm"
+              >
+                {resetting ? 'Resetting…' : 'Reset demo'}
+              </button>
+            )}
+          </div>
+  
+          <div className="rounded-2xl overflow-hidden border border-white/5 shadow-inner bg-[#0a101c]">
+            <LeafletMap
+              markers={markers}
+              wards={wards}
+              riskData={riskData}
+            />
+          </div>
+  
           {DEMO_MODE && role === 'commissioner' && (
-            <button
-              onClick={handleDemoReset}
-              disabled={resetting}
-              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm
-                         font-medium rounded-lg transition-colors disabled:opacity-50"
-            >
-              {resetting ? 'Resetting…' : 'Reset demo'}
-            </button>
+            <p className="text-xs text-[var(--grey-text-dark)] mt-4 text-right font-medium">
+              Tip: Ctrl+Shift+R to hard reset demo map sequence
+            </p>
           )}
         </div>
- 
-        <LeafletMap
-          markers={markers}
-          wards={wards}
-          riskData={riskData}
-        />
- 
-        {DEMO_MODE && role === 'commissioner' && (
-          <p className="text-xs text-gray-400 mt-2 text-right">
-            Tip: Ctrl+Shift+R to reset demo map
-          </p>
-        )}
       </div>
     </main>
   );

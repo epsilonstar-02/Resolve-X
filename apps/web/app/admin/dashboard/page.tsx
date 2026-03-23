@@ -10,12 +10,12 @@ import SandboxBanner            from '../../../components/SandboxBanner';
 const DEMO_MODE = process.env.NEXT_PUBLIC_MODE === 'demo';
 
 const STATUS_COLORS: Record<string, string> = {
-  pending:     'bg-gray-100 text-gray-700',
-  assigned:    'bg-blue-100 text-blue-700',
-  in_progress: 'bg-indigo-100 text-indigo-700',
-  escalated:   'bg-red-100 text-red-700',
-  resolved:    'bg-green-100 text-green-700',
-  closed:      'bg-gray-200 text-gray-600',
+  pending:     'bg-slate-800 text-[var(--grey-text-light)] border border-slate-700',
+  assigned:    'bg-blue-950 text-blue-300 border border-blue-800',
+  in_progress: 'bg-blue-900/60 text-blue-300 border border-blue-700',
+  escalated:   'bg-red-950 text-red-300 border border-red-800',
+  resolved:    'bg-emerald-950 text-emerald-300 border border-emerald-800',
+  closed:      'bg-slate-800 text-[var(--grey-text-dark)] border border-slate-700',
 };
 
 function SLABar({ slaDeadline, createdAt }: { slaDeadline: string; createdAt: string }) {
@@ -30,11 +30,11 @@ function SLABar({ slaDeadline, createdAt }: { slaDeadline: string; createdAt: st
 
   return (
     <div className="mt-2">
-      <div className="flex justify-between text-xs text-gray-400 mb-1">
+      <div className="flex justify-between text-xs text-[var(--grey-text-dark)] mb-1">
         <span>SLA</span>
         <span className={pct >= 100 ? 'text-red-600 font-medium' : ''}>{label}</span>
       </div>
-      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
@@ -117,91 +117,109 @@ export default function AdminDashboard() {
   const filters = ['all', 'pending', 'assigned', 'in_progress', 'escalated'];
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen text-white bg-[var(--main-dark-bg)] w-full relative overflow-hidden">
       <SandboxBanner demoMode={DEMO_MODE} />
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Live complaint feed</h2>
-          <span className="text-sm text-gray-400">{complaints.length} active</span>
+      {/* Ambient Mesh Gradient */}
+      <div className="absolute inset-x-0 top-[-10%] h-[800px] w-full pointer-events-none opacity-40 z-0 flex justify-center">
+        <div className="absolute top-0 right-[15%] w-[600px] h-[600px] rounded-full bg-[var(--purple)] blur-[120px] mix-blend-screen opacity-50" />
+        <div className="absolute top-[10%] left-[10%] w-[500px] h-[500px] rounded-full bg-[var(--blue)] blur-[100px] mix-blend-screen opacity-40" />
+        <div className="absolute top-[30%] left-[40%] w-[400px] h-[400px] rounded-full bg-[var(--pink)] blur-[120px] mix-blend-screen opacity-30" />
+        <div className="absolute top-[-5%] left-[30%] w-[400px] h-[400px] rounded-full bg-[var(--orange)] blur-[100px] mix-blend-screen opacity-20" />
+      </div>
+
+      <div className="relative z-10 max-w-4xl mx-auto px-4 pt-10 pb-16 w-full">
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="ResolveX" className="w-10 h-10 object-contain drop-shadow-sm" />
+            <div>
+              <h2 className="text-2xl font-extrabold text-white tracking-tight" style={{ letterSpacing: '-0.02vw' }}>Live complaint feed</h2>
+              <span className="text-sm text-[var(--grey-text-dark)]">{complaints.length} active requests</span>
+            </div>
+          </div>
         </div>
 
-        {/* Status filter tabs */}
-        <div className="flex gap-2 mb-4 flex-wrap">
+        {/* EternaCloud Style Nav Pills */}
+        <div className="flex gap-2 mb-8 flex-wrap">
           {filters.map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors
+              className={`px-4 py-1.5 rounded-full text-sm font-medium capitalize transition-all duration-200
                 ${filter === f
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-indigo-300'
+                  ? 'bg-white/10 text-white border border-white/20 shadow-sm'
+                  : 'bg-transparent text-[var(--grey-text-dark)] hover:text-white border border-transparent hover:border-white/5 hover:bg-white/5'
                 }`}
             >
-              {f}
+              {f.replace('_', ' ')}
             </button>
           ))}
         </div>
 
         {/* Complaint cards */}
         {loading ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {[1,2,3].map(i => (
-              <div key={i} className="bg-white rounded-xl p-4 animate-pulse h-28" />
+              <div key={i} className="rounded-3xl border border-white/5 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-6 animate-pulse h-32" />
             ))}
           </div>
         ) : complaints.length === 0 ? (
-          <div className="bg-white rounded-xl p-8 text-center text-gray-400 text-sm">
-            No complaints
+          <div className="rounded-3xl border border-white/5 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-12 text-center text-[var(--grey-text-dark)] text-sm font-medium">
+            No complaints require your attention right now.
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {complaints.map(c => (
-              <div key={c.id} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="font-medium text-gray-900 text-sm">{c.category}</span>
+              <div key={c.id} className="rounded-3xl border border-white/5 bg-[var(--secondary-dark)] backdrop-blur-sm shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6 
+                hover:shadow-lg hover:-translate-y-1 hover:border-white/10 transition-all duration-300 ease-out">
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0 pr-4">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <span className="font-semibold text-white tracking-tight text-lg">{c.category}</span>
                       {c.ward_id && (
-                        <span className="text-xs text-gray-400">{c.ward_id}</span>
+                        <span className="text-xs text-[var(--grey-text-dark)] px-2 py-0.5 rounded border border-white/5">
+                          {c.ward_id}
+                        </span>
                       )}
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[c.status] ?? ''}`}>
-                        {c.status}
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase ${STATUS_COLORS[c.status] ?? ''}`}>
+                        {c.status.replace('_', ' ')}
                       </span>
                     </div>
                     {c.description && (
-                      <p className="text-xs text-gray-500 truncate">{c.description}</p>
+                      <p className="text-sm text-[var(--grey-text-light)] leading-relaxed line-clamp-2">{c.description}</p>
                     )}
                     {c.sla_deadline && c.created_at && (
-                      <SLABar slaDeadline={c.sla_deadline} createdAt={c.created_at} />
+                      <div className="mt-4">
+                        <SLABar slaDeadline={c.sla_deadline} createdAt={c.created_at} />
+                      </div>
                     )}
                   </div>
 
                   {/* Action buttons */}
                   {['officer', 'dept_head'].includes(role ?? '') && (
-                    <div className="flex gap-1.5 flex-shrink-0">
+                    <div className="flex flex-row md:flex-col gap-2 flex-shrink-0 mt-4 md:mt-0">
                       <button
                         onClick={() => handleAction(c.id, 'in_progress')}
                         disabled={!!actionLoading || c.status === 'in_progress'}
-                        className="px-2.5 py-1.5 text-xs bg-indigo-50 text-indigo-700 rounded-lg
-                                   hover:bg-indigo-100 disabled:opacity-40 transition-colors font-medium"
+                        className="px-4 py-2 text-xs bg-[var(--blue)] text-white rounded-full
+                                   hover:bg-[var(--navy)] disabled:opacity-40 transition-colors font-semibold shadow-[0_0_15px_rgba(28,78,255,0.4)]"
                       >
-                        Start
+                        Start task
                       </button>
                       <button
                         onClick={() => handleAction(c.id, 'resolved')}
                         disabled={!!actionLoading}
-                        className="px-2.5 py-1.5 text-xs bg-green-50 text-green-700 rounded-lg
-                                   hover:bg-green-100 disabled:opacity-40 transition-colors font-medium"
+                        className="px-4 py-2 text-xs bg-emerald-950 text-emerald-400 border border-emerald-900/50 rounded-full
+                                   hover:bg-emerald-900 disabled:opacity-40 transition-colors font-semibold"
                       >
                         Resolve
                       </button>
                       <a
                         href="/admin/map"
-                        className="px-2.5 py-1.5 text-xs bg-gray-50 text-gray-600 rounded-lg
-                                   hover:bg-gray-100 transition-colors font-medium"
+                        className="px-4 py-2 text-xs bg-white/5 text-[var(--grey-text-light)] border border-white/5 rounded-full
+                                   hover:bg-white/10 transition-colors font-semibold text-center"
                       >
-                        Map
+                        View map
                       </a>
                     </div>
                   )}

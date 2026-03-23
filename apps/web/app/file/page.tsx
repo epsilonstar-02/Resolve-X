@@ -11,7 +11,7 @@ import IssueAnalysisCard from '../../components/IssueAnalysisCard';
 // Leaflet must be dynamically imported — it accesses window on load
 const LocationPicker = dynamic(
   () => import('../../components/Locationpicker'),
-  { ssr: false, loading: () => <div className="h-64 bg-gray-100 rounded-xl animate-pulse" /> }
+  { ssr: false, loading: () => <div className="h-64 bg-slate-100 rounded-xl animate-pulse" /> }
 );
 
 // ── Category definitions ──────────────────────────────────────────────────────
@@ -57,8 +57,8 @@ export default function ComplaintFilingWizard() {
 
   const Screen1 = () => (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-gray-900">What is the issue?</h2>
-      <p className="text-sm text-gray-500">Select a category to continue</p>
+      <h2 className="text-xl font-semibold text-white">What is the issue?</h2>
+      <p className="text-sm text-[var(--grey-text-dark)]">Select a category to continue</p>
       <div className="grid grid-cols-2 gap-3">
         {CATEGORIES.map(cat => (
           <button
@@ -70,8 +70,8 @@ export default function ComplaintFilingWizard() {
             className={`
               flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all
               ${category === cat.id
-                ? 'border-indigo-500 bg-indigo-50 text-indigo-900'
-                : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50 text-gray-700'
+                ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
+                : 'border-white/[0.06] hover:border-blue-500/30 hover:bg-emerald-50/50 text-[var(--grey-text-light)]'
               }
             `}
           >
@@ -92,8 +92,8 @@ export default function ComplaintFilingWizard() {
 
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">Where is the issue?</h2>
-        <p className="text-sm text-gray-500">
+        <h2 className="text-xl font-semibold text-white">Where is the issue?</h2>
+        <p className="text-sm text-[var(--grey-text-dark)]">
           Drag the pin to the exact location
           {DEMO_MODE && ' · Must stay within demo ward boundary'}
         </p>
@@ -166,16 +166,16 @@ export default function ComplaintFilingWizard() {
 
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">Add photo evidence</h2>
-        <p className="text-sm text-gray-500">Optional · Max 3 files · 10MB each</p>
+        <h2 className="text-xl font-semibold text-white">Add photo evidence</h2>
+        <p className="text-sm text-[var(--grey-text-dark)]">Optional · Max 3 files · 10MB each</p>
 
         {/* Upload area */}
         <button
           onClick={() => fileRef.current?.click()}
           disabled={uploading || fileUrls.length >= 3}
-          className="w-full h-32 border-2 border-dashed border-gray-300 rounded-xl
-                     flex flex-col items-center justify-center gap-2 text-gray-400
-                     hover:border-indigo-400 hover:text-indigo-500 transition-colors
+          className="w-full h-32 border-2 border-dashed border-slate-300 rounded-xl
+                      flex flex-col items-center justify-center gap-2 text-[var(--grey-text-dark)]
+                     hover:border-emerald-400 hover:text-emerald-600 transition-colors
                      disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {uploading
@@ -201,7 +201,7 @@ export default function ComplaintFilingWizard() {
           <div className="flex flex-wrap gap-2">
             {fileUrls.map((url, i) => (
               <span key={i}
-                className="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full">
+                className="text-xs bg-emerald-950 text-emerald-300 border border-emerald-800 px-3 py-1 rounded-full">
                 File {i + 1} ✓
               </span>
             ))}
@@ -232,47 +232,47 @@ export default function ComplaintFilingWizard() {
 
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">Review & describe</h2>
+        <h2 className="text-xl font-semibold text-white">Review & describe</h2>
 
         {/* Summary card */}
-        <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
+        <div className="bg-slate-50 rounded-xl p-4 space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-500">Category</span>
-            <span className="font-medium text-gray-900">{selectedCat?.label}</span>
+            <span className="text-[var(--grey-text-dark)]">Category</span>
+            <span className="font-medium text-white">{selectedCat?.label}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">Location</span>
-            <span className="font-medium text-gray-900">
+            <span className="text-[var(--grey-text-dark)]">Location</span>
+            <span className="font-medium text-white">
               {latitude?.toFixed(4)}°N, {longitude?.toFixed(4)}°E
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">Expected SLA</span>
-            <span className="font-medium text-indigo-600">{slaLabel}</span>
+            <span className="text-[var(--grey-text-dark)]">Expected SLA</span>
+            <span className="font-medium text-blue-800">{slaLabel}</span>
           </div>
           {fileUrls.length > 0 && (
             <div className="flex justify-between">
-              <span className="text-gray-500">Evidence</span>
-              <span className="font-medium text-gray-900">{fileUrls.length} file{fileUrls.length > 1 ? 's' : ''}</span>
+              <span className="text-[var(--grey-text-dark)]">Evidence</span>
+              <span className="font-medium text-white">{fileUrls.length} file{fileUrls.length > 1 ? 's' : ''}</span>
             </div>
           )}
         </div>
 
         {/* Optional description — not mandatory per spec */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Additional details <span className="text-gray-400 font-normal">(optional)</span>
+          <label className="block text-sm font-medium text-[var(--grey-text-light)] mb-1">
+            Additional details <span className="text-[var(--grey-text-dark)] font-normal">(optional)</span>
           </label>
           <textarea
-            className="w-full border border-gray-300 rounded-xl p-3 text-sm resize-none
-                       focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+            className="w-full border border-slate-300 rounded-xl p-3 text-sm resize-none
+                       focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400"
             rows={3}
             placeholder="Any additional details about the issue…"
             value={description}
             maxLength={500}
             onChange={e => setField('description', e.target.value)}
           />
-          <p className="text-xs text-gray-400 text-right mt-1">
+          <p className="text-xs text-[var(--grey-text-dark)] text-right mt-1">
             {description.length}/500
           </p>
         </div>
@@ -300,20 +300,20 @@ export default function ComplaintFilingWizard() {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-1">Complaint filed</h2>
-        <p className="text-sm text-gray-500">Your complaint has been submitted successfully</p>
+        <h2 className="text-xl font-semibold text-white mb-1">Complaint filed</h2>
+        <p className="text-sm text-[var(--grey-text-dark)]">Your complaint has been submitted successfully</p>
       </div>
 
       {complaintId && (
-        <div className="bg-gray-50 rounded-xl p-4 space-y-3 text-sm text-left">
+        <div className="bg-slate-50 rounded-xl p-4 space-y-3 text-sm text-left">
           <div className="flex justify-between">
-            <span className="text-gray-500">Complaint ID</span>
-            <span className="font-mono text-xs text-gray-700 truncate max-w-[160px]">{complaintId}</span>
+            <span className="text-[var(--grey-text-dark)]">Complaint ID</span>
+            <span className="font-mono text-xs text-[var(--grey-text-light)] truncate max-w-[160px]">{complaintId}</span>
           </div>
           {slaDeadline && (
             <div className="flex justify-between">
-              <span className="text-gray-500">Expected resolution</span>
-              <span className="font-medium text-indigo-600">
+              <span className="text-[var(--grey-text-dark)]">Expected resolution</span>
+              <span className="font-medium text-blue-800">
                 {new Date(slaDeadline).toLocaleDateString('en-IN', {
                   day: 'numeric', month: 'short', year: 'numeric'
                 })}
@@ -325,16 +325,17 @@ export default function ComplaintFilingWizard() {
 
       <button
         onClick={() => router.push(`/track/${complaintId}`)}
-        className="w-full py-3 px-4 bg-indigo-600 text-white rounded-xl font-medium
-                   hover:bg-indigo-700 active:scale-[0.98] transition-all"
+        className="w-full py-3 px-4 bg-[var(--blue)] text-white rounded-xl font-semibold
+                   shadow-lg shadow-[0_0_15px_rgba(28,78,255,0.4)] hover:bg-[var(--navy)] hover:shadow-lg
+                   active:scale-[0.97] transition-all duration-200"
       >
         Track your complaint
       </button>
 
       <button
         onClick={() => { reset(); setStep(1); setComplaintId(null); }}
-        className="w-full py-3 px-4 border border-gray-200 text-gray-600 rounded-xl
-                   font-medium hover:bg-gray-50 transition-colors text-sm"
+        className="w-full py-3 px-4 border border-white/[0.06] text-[var(--grey-text-light)] rounded-xl
+                   font-medium hover:bg-white/5 transition-colors text-sm"
       >
         File another complaint
       </button>
@@ -397,16 +398,16 @@ export default function ComplaintFilingWizard() {
                 <span
                   key={label}
                   className={`text-xs font-medium ${
-                    i + 1 <= step ? 'text-indigo-600' : 'text-gray-300'
+                    i + 1 <= step ? 'text-emerald-600' : 'text-[var(--grey-text-light)]'
                   }`}
                 >
                   {label}
                 </span>
               ))}
             </div>
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+                className="h-full bg-emerald-500 rounded-full transition-all duration-500"
                 style={{ width: `${((step - 1) / 4) * 100}%` }}
               />
             </div>
@@ -440,8 +441,8 @@ function WizardNav({
       {onBack && (
         <button
           onClick={onBack}
-          className="flex-1 py-3 px-4 border border-gray-200 text-gray-600 rounded-xl
-                     font-medium hover:bg-gray-50 transition-colors"
+          className="flex-1 py-3 px-4 border border-white/[0.06] text-[var(--grey-text-light)] rounded-xl
+                     font-medium hover:bg-white/5 transition-colors"
         >
           Back
         </button>
@@ -449,8 +450,9 @@ function WizardNav({
       <button
         onClick={onNext}
         disabled={nextDisabled}
-        className="flex-1 py-3 px-4 bg-indigo-600 text-white rounded-xl font-medium
-                   hover:bg-indigo-700 active:scale-[0.98] transition-all
+        className="flex-1 py-3 px-4 bg-[var(--blue)] text-white rounded-xl font-semibold
+                   shadow-lg shadow-[0_0_15px_rgba(28,78,255,0.4)] hover:bg-[var(--navy)] hover:shadow-lg
+                   active:scale-[0.97] transition-all duration-200
                    disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
       >
         {nextLabel}

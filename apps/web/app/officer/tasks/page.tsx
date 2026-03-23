@@ -14,10 +14,10 @@ const DEMO_MODE = process.env.NEXT_PUBLIC_MODE === 'demo';
 const BASE      = process.env.NEXT_PUBLIC_API_URL;
 
 const STATUS_COLORS: Record<string, string> = {
-  open:        'bg-gray-100 text-gray-700',
-  in_progress: 'bg-indigo-100 text-indigo-700',
-  escalated:   'bg-red-100 text-red-700',
-  resolved:    'bg-green-100 text-green-700',
+  open:        'bg-slate-800 text-[var(--grey-text-light)] border border-slate-700',
+  in_progress: 'bg-blue-900/60 text-blue-300 border border-blue-700',
+  escalated:   'bg-red-950 text-red-300 border border-red-800',
+  resolved:    'bg-emerald-950 text-emerald-300 border border-emerald-800',
 };
 
 function SLABar({ deadline, createdAt }: { deadline: string; createdAt: string }) {
@@ -29,13 +29,13 @@ function SLABar({ deadline, createdAt }: { deadline: string; createdAt: string }
   const m       = Math.max(0, Math.floor(((new Date(deadline).getTime() - Date.now()) % 3600000) / 60000));
   return (
     <div className="mt-2">
-      <div className="flex justify-between text-xs text-gray-400 mb-1">
+      <div className="flex justify-between text-xs text-[var(--grey-text-dark)] mb-1">
         <span>SLA</span>
         <span className={pct >= 100 ? 'text-red-600 font-medium' : ''}>
           {pct >= 100 ? 'Overdue' : `${h}h ${m}m`}
         </span>
       </div>
-      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
@@ -117,38 +117,42 @@ export default function OfficerTasks() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen text-white bg-[var(--main-dark-bg)] w-full">
       <SandboxBanner demoMode={DEMO_MODE} />
       <div className="max-w-2xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">My tasks</h2>
-          <span className="text-sm text-gray-400">{tasks.length} open</span>
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="ResolveX" className="drop-shadow-sm" style={{ width: 44, height: 44, objectFit: 'contain' }} />
+            <h2 className="text-xl font-semibold text-white">My tasks</h2>
+          </div>
+          <span className="text-sm text-[var(--grey-text-dark)]">{tasks.length} open</span>
         </div>
 
         {loading ? (
           <div className="space-y-3">
-            {[1,2,3].map(i => <div key={i} className="bg-white rounded-xl h-32 animate-pulse" />)}
+            {[1,2,3].map(i => <div key={i} className="rounded-2xl border border-white/5 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.5)]  h-32 animate-pulse" />)}
           </div>
         ) : tasks.length === 0 ? (
-          <div className="bg-white rounded-xl p-8 text-center text-gray-400 text-sm">
+          <div className="rounded-2xl border border-white/5 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.5)]  p-8 text-center text-[var(--grey-text-dark)] text-sm">
             No tasks assigned
           </div>
         ) : (
           <div className="space-y-3">
             {tasks.map(task => (
               <div key={task.id}
-                className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                className="rounded-2xl border border-white/5 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.5)]  p-4 border border-white/[0.06] shadow-sm
+                  hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-gray-900 text-sm">
+                      <span className="font-medium text-white text-sm">
                         {task.category}
                       </span>
                       {task.ward_id && (
-                        <span className="text-xs text-gray-400">{task.ward_id}</span>
+                        <span className="text-xs text-[var(--grey-text-dark)]">{task.ward_id}</span>
                       )}
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium
-                        ${STATUS_COLORS[task.status] ?? 'bg-gray-100 text-gray-600'}`}>
+                        ${STATUS_COLORS[task.status] ?? 'bg-slate-800 text-[var(--grey-text-light)] border border-slate-700'}`}>
                         {task.status?.replace('_', ' ')}
                       </span>
                       {task.officer_verified && (
@@ -156,7 +160,7 @@ export default function OfficerTasks() {
                       )}
                     </div>
                     {task.description && (
-                      <p className="text-xs text-gray-500 mt-1 truncate max-w-xs">
+                      <p className="text-xs text-[var(--grey-text-dark)] mt-1 truncate max-w-xs">
                         {task.description}
                       </p>
                     )}
@@ -173,8 +177,8 @@ export default function OfficerTasks() {
                     <button
                       onClick={() => handleAction(task, 'in_progress')}
                       disabled={!!actionId}
-                      className="px-3 py-1.5 text-xs bg-indigo-50 text-indigo-700
-                                 rounded-lg hover:bg-indigo-100 disabled:opacity-40
+                      className="px-3 py-1.5 text-xs bg-blue-50 text-blue-800
+                                 rounded-lg hover:bg-blue-100 disabled:opacity-40
                                  font-medium transition-colors"
                     >
                       Start work
@@ -183,8 +187,8 @@ export default function OfficerTasks() {
                   <button
                     onClick={() => handleAction(task, 'resolved')}
                     disabled={!!actionId}
-                    className="px-3 py-1.5 text-xs bg-green-50 text-green-700
-                               rounded-lg hover:bg-green-100 disabled:opacity-40
+                    className="px-3 py-1.5 text-xs bg-emerald-950 text-emerald-300 border border-emerald-800
+                               rounded-lg hover:bg-emerald-100 disabled:opacity-40
                                font-medium transition-colors"
                   >
                     Mark resolved
@@ -201,8 +205,8 @@ export default function OfficerTasks() {
                     </button>
                   )}
                   <a href="/admin/map"
-                    className="px-3 py-1.5 text-xs bg-gray-50 text-gray-600
-                               rounded-lg hover:bg-gray-100 font-medium transition-colors">
+                    className="px-3 py-1.5 text-xs bg-slate-50 text-[var(--grey-text-light)]
+                               rounded-lg hover:bg-slate-100 font-medium transition-colors">
                     View on map
                   </a>
                 </div>

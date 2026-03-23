@@ -13,12 +13,12 @@ const DEMO_MODE = process.env.NEXT_PUBLIC_MODE === 'demo';
 const BASE      = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
 const STATUS_COLORS: Record<string, string> = {
-  pending:     'bg-gray-100 text-gray-700',
-  assigned:    'bg-blue-100 text-blue-700',
-  in_progress: 'bg-indigo-100 text-indigo-700',
-  escalated:   'bg-red-100 text-red-700',
-  resolved:    'bg-green-100 text-green-700',
-  closed:      'bg-gray-200 text-gray-500',
+  pending:     'bg-slate-800 text-[var(--grey-text-light)] border border-slate-700',
+  assigned:    'bg-blue-950 text-blue-300 border border-blue-800',
+  in_progress: 'bg-blue-900/60 text-blue-300 border border-blue-700',
+  escalated:   'bg-red-950 text-red-300 border border-red-800',
+  resolved:    'bg-emerald-950 text-emerald-300 border border-emerald-800',
+  closed:      'bg-slate-800 text-[var(--grey-text-dark)] border border-slate-700',
 };
 
 export default function DeptOverview() {
@@ -77,14 +77,17 @@ export default function DeptOverview() {
   const escalated = complaints.filter(c => c.status === 'escalated').length;
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen text-white bg-[var(--main-dark-bg)] w-full">
       <SandboxBanner demoMode={DEMO_MODE} />
-      <div className="bg-white border-b border-gray-100 px-4 py-4 flex items-center justify-between">
-        <div>
-          <p className="text-xs text-gray-400">Department head</p>
-          <h1 className="text-lg font-semibold text-gray-900">Dept overview</h1>
+      <div className="border-b border-white/[0.06] backdrop-blur-md px-4 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="ResolveX" className="drop-shadow-sm" style={{ width: 44, height: 44, objectFit: 'contain' }} />
+          <div>
+            <p className="text-xs text-[var(--grey-text-dark)]">Department head</p>
+            <h1 className="text-lg font-semibold text-white">Dept overview</h1>
+          </div>
         </div>
-        <a href="/admin/map" className="text-xs text-indigo-500 hover:underline">View map →</a>
+        <a href="/admin/map" className="text-xs text-[var(--blue)] hover:text-white hover:underline transition-colors">View map →</a>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
@@ -93,40 +96,40 @@ export default function DeptOverview() {
         <div className="grid grid-cols-3 gap-3">
           {[
             { label: 'SLA compliance', value: `${slaRate}%`, color: slaColor },
-            { label: 'Active',         value: active.length,   color: 'text-indigo-600' },
-            { label: 'Escalated',      value: escalated,        color: escalated > 0 ? 'text-red-600' : 'text-gray-600' },
+            { label: 'Active',         value: active.length,   color: 'text-blue-800' },
+            { label: 'Escalated',      value: escalated,        color: escalated > 0 ? 'text-red-600' : 'text-[var(--grey-text-light)]' },
           ].map(kpi => (
-            <div key={kpi.label} className="bg-white rounded-xl p-4 border border-gray-100 text-center">
+            <div key={kpi.label} className="bg-[#0f1629] rounded-2xl p-5 border border-white/[0.06] shadow-sm text-center">
               <p className={`text-2xl font-bold ${kpi.color}`}>{kpi.value}</p>
-              <p className="text-xs text-gray-400 mt-1">{kpi.label}</p>
+              <p className="text-xs text-[var(--grey-text-dark)] mt-1">{kpi.label}</p>
             </div>
           ))}
         </div>
 
         {/* Officer workload */}
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-700">Officer workload</h2>
+        <div className="rounded-3xl border border-white/5 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.5)]  shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-white/[0.06]">
+            <h2 className="text-sm font-semibold text-[var(--grey-text-light)]">Officer workload</h2>
           </div>
           {Object.keys(workload).length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-8">No assignments yet</p>
+            <p className="text-sm text-[var(--grey-text-dark)] text-center py-8">No assignments yet</p>
           ) : (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-slate-50">
               {Object.entries(workload).map(([id, w]) => {
                 const total = w.open + w.resolved;
                 const pct   = total ? Math.round((w.resolved / total) * 100) : 0;
                 return (
                   <div key={id} className="px-4 py-3 flex items-center gap-4">
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center
-                                    justify-center text-indigo-700 text-xs font-bold flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center
+                                    justify-center text-blue-800 text-xs font-bold flex-shrink-0">
                       {w.name.slice(0, 2).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between mb-1">
-                        <span className="text-sm font-medium text-gray-800 truncate">{w.name}</span>
-                        <span className="text-xs text-gray-400">{w.open} open · {w.resolved} done</span>
+                        <span className="text-sm font-medium text-slate-800 truncate">{w.name}</span>
+                        <span className="text-xs text-[var(--grey-text-dark)]">{w.open} open · {w.resolved} done</span>
                       </div>
-                      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div className="h-full bg-green-400 rounded-full" style={{ width: `${pct}%` }} />
                       </div>
                     </div>
@@ -140,22 +143,22 @@ export default function DeptOverview() {
         {/* Complaint feed */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-gray-700">All dept complaints</h2>
-            <span className="text-xs text-gray-400">{complaints.length} total</span>
+            <h2 className="text-sm font-semibold text-[var(--grey-text-light)]">All dept complaints</h2>
+            <span className="text-xs text-[var(--grey-text-dark)]">{complaints.length} total</span>
           </div>
           {loading ? (
-            <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-16 bg-white rounded-xl animate-pulse" />)}</div>
+            <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-16 rounded-xl border-white/[0.06]" style={{ background: '#0f1629' }} className=" animate-pulse" />)}</div>
           ) : (
             <div className="space-y-2">
               {complaints.slice(0, 20).map(c => (
                 <div key={c.id}
                   onClick={() => router.push(`/track/${c.id}`)}
-                  className="bg-white rounded-xl px-4 py-3 border border-gray-100
-                             flex items-center justify-between cursor-pointer
-                             hover:border-indigo-200 transition-colors">
+                  className="rounded-2xl border border-white/5 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.5)]  px-4 py-3 border border-white/[0.06]
+                             shadow-sm flex items-center justify-between cursor-pointer
+                             hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
                   <div>
-                    <span className="text-sm font-medium text-gray-800">{c.category}</span>
-                    {c.ward_id && <span className="text-xs text-gray-400 ml-2">{c.ward_id}</span>}
+                    <span className="text-sm font-medium text-slate-800">{c.category}</span>
+                    {c.ward_id && <span className="text-xs text-[var(--grey-text-dark)] ml-2">{c.ward_id}</span>}
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[c.status] ?? ''}`}>
                     {c.status}

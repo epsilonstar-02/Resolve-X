@@ -61,75 +61,105 @@ export default function RolePicker() {
   };
  
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
-      {/* Brand */}
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold text-indigo-600 tracking-tight mb-2">ResolveX</h1>
-        <p className="text-gray-500 text-sm">
-          Smart Public Service CRM · Citizen complaints → urban intelligence
-        </p>
-      </div>
- 
-      {/* Role cards */}
-      <div className="w-full max-w-md space-y-3">
-        {ROLES.map(role => (
-          <button
-            key={role.id}
-            onClick={() => router.push(role.href)}
-            className="w-full flex items-center gap-4 px-5 py-4 bg-white border border-gray-200
-                       rounded-2xl hover:border-indigo-300 hover:bg-indigo-50
-                       transition-all text-left active:scale-[0.98]"
-          >
-            <span className="text-2xl">{role.icon}</span>
-            <div>
-              <p className="font-semibold text-gray-900">{role.label}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{role.desc}</p>
-            </div>
-          </button>
-        ))}
-      </div>
- 
-      {/* Guest track path — no auth required */}
-      <div className="mt-6">
-        <button
+    <main className="min-h-screen text-white bg-[var(--main-dark-bg)] relative overflow-hidden flex flex-col items-center">
+      {/* Navbar simulation */}
+      <nav className="w-full flex justify-between items-center px-8 py-6 z-50">
+        <div className="flex items-center gap-2">
+          <img src="/logo.png" alt="ResolveX" className="w-8 h-8 object-contain" />
+          <span className="font-semibold tracking-wide">ResolveX</span>
+        </div>
+        <div className="hidden md:flex gap-8 text-[var(--grey-text-dark)] text-sm">
+          <span className="hover:text-white cursor-pointer transition-colors">Platform</span>
+          <span className="hover:text-white cursor-pointer transition-colors">Solutions</span>
+          <span className="hover:text-white cursor-pointer transition-colors">Resources</span>
+          <span className="hover:text-white cursor-pointer transition-colors">Pricing</span>
+        </div>
+        <button 
+          className="bg-[var(--blue)] hover:bg-[var(--navy-dark)] text-white px-6 py-2 rounded-full text-sm transition-all duration-300 shadow-[0_0_15px_rgba(28,78,255,0.4)]"
           onClick={() => {
             const id = prompt('Enter your complaint ID to track it:');
             if (id?.trim()) router.push(`/track/${id.trim()}`);
           }}
-          className="text-sm text-indigo-500 hover:underline"
         >
-          Track complaint without signing in →
+          Track Issue
         </button>
+      </nav>
+
+      {/* Hero Central Glow (EternaCloud style) */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[600px] pointer-events-none z-0 flex justify-center opacity-80">
+        <div className="absolute w-[80vw] h-[300px] bg-[var(--purple)] blur-[150px] rounded-[100%] opacity-50" />
+        <div className="absolute w-[60vw] h-[200px] bg-[var(--pink)] blur-[120px] rounded-[100%] opacity-40 mt-[50px]" />
+        <div className="absolute w-[40vw] h-[150px] bg-[var(--orange)] blur-[100px] rounded-[100%] opacity-40 mt-[100px]" />
       </div>
- 
-      {/* Demo citizen button — DEMO_MODE only */}
+
+      {/* Hero content */}
+      <div className="relative z-10 w-full max-w-5xl px-4 pt-16 md:pt-24 pb-20 flex flex-col items-center text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-8 text-xs font-medium text-[var(--grey-text-light)]">
+          ✨ ResolveX Public Beta
+        </div>
+        <h1 
+          className="font-extrabold text-white mb-6 leading-[1.1]"
+          style={{ fontSize: 'clamp(3rem, 6vw, 5.5rem)', letterSpacing: '-0.042vw' }}
+        >
+          Manage cities with ease.
+        </h1>
+        <p className="text-[var(--grey-text-dark)] text-lg md:text-xl max-w-2xl mx-auto leading-relaxed" style={{ fontSize: 'clamp(1rem, 1.389vw, 1.25rem)' }}>
+          A collaborative and intuitive platform streamlining civic issue resolution. 
+          Unifying citizens and administration on one intelligent CRM.
+        </p>
+      </div>
+
+      {/* Horizontal Cards Row (Grid) */}
+      <div className="relative z-20 w-full max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-32">
+        {ROLES.map((role) => (
+          <button
+            key={role.id}
+            onClick={() => router.push(role.href)}
+            className="group flex flex-col items-start p-8 rounded-3xl border border-white/5 
+                       bg-[var(--secondary-dark)] hover:bg-[#1f162e] 
+                       hover:-translate-y-2 transition-all duration-300 ease-out text-left
+                       shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+          >
+            <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-2xl mb-6 group-hover:bg-[var(--blue)] transition-colors duration-300">
+              {role.icon}
+            </div>
+            <h3 className="font-semibold text-white text-lg mb-2" style={{ letterSpacing: '-0.02vw' }}>
+              {role.label}
+            </h3>
+            <p className="text-[var(--grey-text-dark)] text-sm leading-relaxed">
+              {role.desc}
+            </p>
+            <div className="mt-8 flex items-center text-xs text-[var(--blue)] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+              Access portal <span className="ml-1">→</span>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Demo button */}
       {DEMO_MODE && (
-        <div className="mt-8 w-full max-w-md">
-          <div className="border-t border-dashed border-amber-300 pt-6">
+        <div className="relative z-20 mt-10 w-full max-w-sm mx-auto px-4 pb-20">
+          <div className="p-[1px] rounded-full bg-gradient-to-r from-[var(--orange)] via-[var(--pink)] to-[var(--purple)]">
             <button
               onClick={handleDemoLogin}
               disabled={loading}
-              className="w-full py-3.5 px-4 bg-amber-400 hover:bg-amber-500
-                         text-amber-900 font-semibold rounded-2xl transition-all
+              className="w-full py-4 px-6 bg-[var(--main-dark-bg)] rounded-full transition-all
                          active:scale-[0.98] disabled:opacity-60
-                         flex items-center justify-center gap-2"
+                         flex items-center justify-center gap-3 group hover:bg-transparent"
             >
               {loading ? (
-                <span className="w-4 h-4 border-2 border-amber-700 border-t-transparent rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 border-[var(--grey-text-light)] border-t-transparent rounded-full animate-spin" />
               ) : (
-                <span>⚡</span>
+                <span className="text-[var(--orange)] group-hover:text-white transition-colors">⚡</span>
               )}
-              {loading ? 'Signing in…' : 'Try as Demo Citizen'}
+              <span className="text-white font-medium">Try as Demo Citizen</span>
             </button>
-            <p className="text-xs text-center text-amber-700 mt-2">
-              Sandbox mode · No OTP required · For exhibition only
-            </p>
           </div>
         </div>
       )}
- 
+
       {error && (
-        <p className="mt-4 text-sm text-red-600 text-center">{error}</p>
+        <p className="relative z-20 mt-4 text-sm text-[var(--pink)] text-center">{error}</p>
       )}
     </main>
   );
