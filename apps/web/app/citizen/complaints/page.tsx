@@ -78,7 +78,7 @@ export default function CitizenComplaints() {
 
         {loading ? (
           <div className="space-y-3">
-            {[1,2,3].map(i => <div key={i} className="h-24 rounded-xl border-white/[0.06]" style={{ background: '#0f1629' }} className=" animate-pulse" />)}
+            {[1,2,3].map(i => <div key={i} className="h-24 rounded-xl border-white/5 bg-[var(--secondary-dark)] animate-pulse" />)}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12">

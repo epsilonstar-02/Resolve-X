@@ -147,7 +147,7 @@ export default function DeptOverview() {
             <span className="text-xs text-[var(--grey-text-dark)]">{complaints.length} total</span>
           </div>
           {loading ? (
-            <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-16 rounded-xl border-white/[0.06]" style={{ background: '#0f1629' }} className=" animate-pulse" />)}</div>
+            <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-16 rounded-xl border-white/5 bg-[var(--secondary-dark)] animate-pulse" />)}</div>
           ) : (
             <div className="space-y-2">
               {complaints.slice(0, 20).map(c => (

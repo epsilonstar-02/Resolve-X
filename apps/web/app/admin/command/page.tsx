@@ -191,7 +191,7 @@ export default function CityCommand() {
         {activeTab === 'feed' && (
           <div className="space-y-2">
             {loading ? (
-              [1,2,3].map(i => <div key={i} className="h-16 rounded-xl border-white/[0.06]" style={{ background: '#0f1629' }} className=" animate-pulse" />)
+              [1,2,3].map(i => <div key={i} className="h-16 rounded-xl border-white/5 bg-[var(--secondary-dark)] animate-pulse" />)
             ) : complaints.slice(0, 30).map(c => (
               <div key={c.id}
                 onClick={() => router.push(`/track/${c.id}`)}

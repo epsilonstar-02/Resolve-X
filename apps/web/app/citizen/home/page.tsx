@@ -198,9 +198,10 @@ export default function CitizenHome() {
             <button
               key={action.label}
               onClick={action.onClick ?? (() => router.push(action.href))}
-              className="flex flex-col items-center gap-2 rounded-xl border-white/[0.06]" style={{ background: '#0f1629' }} className=" p-4
-                         border border-white/[0.06] shadow-sm hover:border-blue-500/30 hover:bg-emerald-50/50
-                         hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 active:scale-95 text-center"
+              className="flex flex-col items-center gap-2 rounded-2xl p-4
+                         bg-[var(--secondary-dark)] border border-white/5 shadow-[0_4px_16px_rgba(0,0,0,0.3)]
+                         hover:border-white/10 hover:bg-[#1f162e] hover:shadow-lg hover:-translate-y-1
+                         transition-all duration-300 ease-out active:scale-95 text-center"
             >
               <span className="text-2xl">{action.icon}</span>
               <span className="text-xs text-[var(--grey-text-light)] font-medium leading-tight">
