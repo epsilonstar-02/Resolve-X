@@ -136,8 +136,25 @@ services:
       NEXT_PUBLIC_MODE:     demo
    # volumes:
     #  - ./apps/web:/app
-     # - /app/node_modules
+      - /app/node_modules
       #- /app/.next                   # prevent .next cache conflicts
+
+  # ── AI Classification & Detection Service (Python/FastAPI) ─────────────────
+  classifier:
+    build:
+      context:    ./classification_and_detection
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - '8000:8000'
+    env_file: .env
+    environment:
+      APP_PORT: 8000
+    healthcheck:
+      test:     ['CMD', 'curl', '-f', 'http://localhost:8000/healthz']
+      interval: 10s
+      timeout:  5s
+      retries:  5
 
   # ── DBSCAN Clustering Service (Python/FastAPI) ───────────────────────────
   dbscan:

@@ -5,7 +5,7 @@ import sys
 # ---------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------
-VM_IP = "35.188.144.29"
+VM_IP = "localhost" # Changed from 35.188.144.29 to localhost
 DBSCAN_URL = "http://localhost:8010"
 RISK_URL = "http://localhost:8020"
 
