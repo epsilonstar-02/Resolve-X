@@ -2,11 +2,13 @@
 
  
 import { useParams }    from 'next/navigation';
+import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
 import { getComplaint, submitFeedback } from '../../../utils/api';
 import { addWebSocketListener } from '../../../utils/ws';
 import { useAuthStore } from '../../../store/auth';
 import SandboxBanner from '../../../components/SandboxBanner';
+import type { ApiErrorLike, Complaint, ComplaintHistoryEntry } from '../../../utils/types';
  
 const DEMO_MODE = process.env.NEXT_PUBLIC_MODE === 'demo';
  
@@ -24,7 +26,7 @@ export default function TrackComplaint() {
   const id         = params?.id as string;
   const { token }  = useAuthStore();
  
-  const [complaint, setComplaint]   = useState<any>(null);
+  const [complaint, setComplaint]   = useState<Complaint | null>(null);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState<string | null>(null);
   const [csatRating, setCsatRating] = useState<number | null>(null);
@@ -38,8 +40,9 @@ export default function TrackComplaint() {
       const data = await getComplaint(id, token ?? undefined);
       setComplaint(data);
       setError(null);
-    } catch (err: any) {
-      setError(err.message ?? 'Complaint not found');
+    } catch (err) {
+      const apiError = err as ApiErrorLike;
+      setError(apiError.message ?? 'Complaint not found');
     } finally {
       setLoading(false);
     }
@@ -51,8 +54,9 @@ export default function TrackComplaint() {
   // SLA countdown timer
   useEffect(() => {
     if (!complaint?.sla_deadline) return;
+    const deadline = complaint.sla_deadline;
     const tick = () => {
-      const diff = new Date(complaint.sla_deadline).getTime() - Date.now();
+      const diff = new Date(deadline).getTime() - Date.now();
       if (diff <= 0) { setTimeLeft('Overdue'); return; }
       const h = Math.floor(diff / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
@@ -97,12 +101,14 @@ export default function TrackComplaint() {
   if (error) return (
     <main className="max-w-lg mx-auto mt-10 px-4 text-center">
       <p className="text-red-600">{error}</p>
-      <a href="/" className="text-blue-700 text-sm mt-4 block hover:text-blue-900 hover:underline transition-colors">← Back to home</a>
+      <Link href="/" className="text-blue-700 text-sm mt-4 block hover:text-blue-900 hover:underline transition-colors">← Back to home</Link>
     </main>
   );
  
-  const statusInfo = STATUS_LABELS[complaint?.status] ?? STATUS_LABELS.pending;
-  const isResolved = ['resolved', 'closed'].includes(complaint?.status);
+  const complaintStatus = complaint?.status ?? 'pending';
+  const statusInfo = STATUS_LABELS[complaintStatus] ?? STATUS_LABELS.pending;
+  const isResolved = ['resolved', 'closed'].includes(complaintStatus);
+  const history = complaint?.history ?? [];
  
   return (
     <main className="max-w-lg mx-auto px-4 py-8">
@@ -155,11 +161,11 @@ export default function TrackComplaint() {
       </div>
  
       {/* History timeline */}
-      {complaint?.history?.length > 0 && (
+      {history.length > 0 && (
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-slate-300 mb-3">Timeline</h3>
           <ol className="relative border-l border-white/[0.06] ml-3 space-y-4">
-            {complaint.history.map((entry: any, i: number) => (
+            {history.map((entry: ComplaintHistoryEntry, i: number) => (
               <li key={i} className="ml-4">
                 <div className="absolute -left-1.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white" />
                 <div className="text-sm">
@@ -226,7 +232,7 @@ export default function TrackComplaint() {
         </div>
       )}
  
-      <a href="/" className="text-sm text-blue-400 hover:text-blue-300 hover:underline transition-colors">← Back to home</a>
+      <Link href="/" className="text-sm text-blue-400 hover:text-blue-300 hover:underline transition-colors">← Back to home</Link>
     </main>
   );
 }
