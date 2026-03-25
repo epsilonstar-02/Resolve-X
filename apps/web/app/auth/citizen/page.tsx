@@ -30,7 +30,7 @@ export default function CitizenAuth() {
 
   const handleRequestOtp = async () => {
     const cleaned = phone.trim().replace(/\s/g, '');
-    if (!/^\+?[0-9]{10,13}$/.test(cleaned)) {
+   if (!/^\+?[0-9]{10,15}$/.test(cleaned)) {
       setError('Enter a valid phone number');
       return;
     }

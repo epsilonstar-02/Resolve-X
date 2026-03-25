@@ -78,6 +78,29 @@ const IS_DEMO         = process.env.DEMO_MODE === 'true';
 // In non-production with mock provider, always use 123456
 const USE_MOCK_OTP = process.env.OTP_PROVIDER !== 'twilio';
 
+// ── Phone normalisation ───────────────────────────────────────────────────────
+// Twilio requires E.164 format: +<country_code><number>
+// Handles: 9123707332 → +919123707332
+//          +919123707332 → +919123707332 (already correct)
+//          09123707332 → +919123707332 (leading 0 stripped)
+
+function normalizePhone(phone) {
+  // Strip all spaces and dashes
+  let p = phone.replace(/[\s\-]/g, '');
+
+  // Already E.164
+  if (p.startsWith('+')) return p;
+
+  // Strip leading 0 (some users type 091...)
+  if (p.startsWith('0')) p = p.slice(1);
+
+  // If 10 digits assume India (+91)
+  if (p.length === 10) return `+91${p}`;
+
+  // Already has country code without +
+  return `+${p}`;
+}
+
 // ── Twilio Verify client (lazy — only created when provider=twilio) ───────────
 
 let twilioClient = null;
@@ -225,8 +248,9 @@ function requireRole(...roles) {
 
 router.post('/otp/request', async (req, res) => {
   try {
-    const { phone } = req.body;
-    if (!phone) return res.status(400).json({ error: 'Phone is required' });
+    const rawPhone = req.body.phone;
+    if (!rawPhone) return res.status(400).json({ error: 'Phone is required' });
+    const phone = normalizePhone(rawPhone);
 
     // Rate limit: max 3 requests per phone per 15 min
     const rateLimitKey = `otp:ratelimit:${phone}`;
@@ -249,8 +273,10 @@ router.post('/otp/request', async (req, res) => {
 
 router.post('/otp/verify', async (req, res) => {
   try {
-    const { phone, otp, name } = req.body;
-    if (!phone || !otp) return res.status(400).json({ error: 'Phone and OTP are required' });
+    const { otp, name } = req.body;
+    const rawPhone = req.body.phone;
+    if (!rawPhone || !otp) return res.status(400).json({ error: 'Phone and OTP are required' });
+    const phone = normalizePhone(rawPhone);
 
     // Attempt lockout (mock provider only — Twilio handles this internally)
     if (USE_MOCK_OTP) {

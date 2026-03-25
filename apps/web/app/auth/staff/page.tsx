@@ -184,7 +184,7 @@ export default function StaffAuth() {
                 onChange={e => setTotp(e.target.value.replace(/\D/g, ''))}
                 onKeyDown={e => e.key === 'Enter' && handleTotp()}
                 placeholder="000000"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 
                            tracking-widest text-center text-xl font-mono text-white placeholder:text-white/30
                            focus:outline-none focus:ring-2 focus:ring-[var(--blue)] focus:border-[var(--blue)] transition-all"
               />
