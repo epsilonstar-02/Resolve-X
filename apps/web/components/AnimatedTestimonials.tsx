@@ -28,7 +28,7 @@ const socialIconMap = {
 const testimonials: Testimonial[] = [
   {
     name: 'Danish Shah',
-    designation: 'Full Stack, DBMS Developer',
+    designation: 'Full Stack, DBMS Developer,DevOps Engineer',
     quote: 'Third Year IT Student at Techno Main Salt Lake and a core builder behind ResolveX.',
     src: '/ME.jpeg',
     socials: [
@@ -39,7 +39,7 @@ const testimonials: Testimonial[] = [
   },
   {
     name: 'Arnab Maiti',
-    designation: 'Backend, Blockchain',
+    designation: 'Backend, ',
     quote: 'Third Year IT Student at Techno Main Salt Lake building blockchain-powered solutions for trust, automation, and real-world impact.',
     src: '/Arnab.jpeg',
     socials: [
