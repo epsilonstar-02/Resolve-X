@@ -7,6 +7,7 @@ const withPWA = nextPwa({
 });
 
 const workspaceRoot = fileURLToPath(new URL('../..', import.meta.url));
+const vmHost = process.env.NEXT_PUBLIC_VM_HOST || '35.188.144.29';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -15,6 +16,7 @@ const nextConfig = {
     remotePatterns: [
       { protocol: 'http', hostname: 'localhost' },
       { protocol: 'http', hostname: 'minio' },
+      { protocol: 'http', hostname: vmHost, port: '9000' },
     ],
   },
   turbopack: {

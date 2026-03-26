@@ -23,7 +23,9 @@ const LeafletMap = dynamic(() => import('../../../components/AdminLeafletMap'), 
 });
 
 const DEMO_MODE    = process.env.NEXT_PUBLIC_MODE === 'demo';
-const DBSCAN_URL   = process.env.NEXT_PUBLIC_DBSCAN_URL || 'http://localhost:8010';
+const runtimeHost  = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+const DBSCAN_URL   = process.env.NEXT_PUBLIC_DBSCAN_URL || `http://${runtimeHost}:8010`;
+const API_URL      = process.env.NEXT_PUBLIC_API_URL || `http://${runtimeHost}:4000/api/v1`;
 
 // GeoJSON type for DBSCAN cluster features
 interface ClusterProperties {
@@ -57,7 +59,7 @@ export default function AdminMapPage() {
   const fetchRisk = useCallback(async () => {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/gis/risk-heatmap`,
+        `${API_URL}/gis/risk-heatmap`,
         token ? { headers: { Authorization: `Bearer ${token}` } } : {}
       );
       const data = await res.json();

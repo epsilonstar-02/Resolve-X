@@ -1,7 +1,13 @@
 import { useAuthStore } from '../store/auth';
 import type { WebSocketEvent } from './types';
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4000';
+function getDefaultWsUrl(): string {
+  if (typeof window === 'undefined') return 'ws://localhost:4000';
+  const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  return `${protocol}://${window.location.hostname}:4000`;
+}
+
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || getDefaultWsUrl();
 const RECONNECT_DELAY_MS = 3000;
 
 type EventHandler = (event: WebSocketEvent) => void;

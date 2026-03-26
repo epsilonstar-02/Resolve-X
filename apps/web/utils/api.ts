@@ -2,7 +2,6 @@
 // Central API utility for ResolveX frontend.
 // Attaches Authorization header from token argument.
 // Throws a typed error with the server's error message on non-2xx responses.
-//const BASE = process.env.NEXT_PUBLIC_API_URL;
 import type {
   Complaint,
   GeoJsonFeatureCollection,
@@ -10,9 +9,8 @@ import type {
   SecondaryIssue,
 } from './types';
 
-const BASE = "http://localhost:4000/api/v1"; 
-
-console.log('API BASE URL:', BASE);
+const runtimeHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+const BASE = process.env.NEXT_PUBLIC_API_URL || `http://${runtimeHost}:4000/api/v1`;
 
 class ApiError extends Error {
   status: number;

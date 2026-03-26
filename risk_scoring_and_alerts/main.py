@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import math
 import logging
+import os
 import httpx
 from enum import Enum
 from typing import Any
@@ -28,7 +29,10 @@ from pydantic import BaseModel, Field, model_validator
 # ---------------------------------------------------------------------------
 # Options
 # ---------------------------------------------------------------------------
-DBSCAN_SERVICE_URL = "http://localhost:8010/api/v1/analytics/clusters"
+DBSCAN_SERVICE_URL = os.getenv(
+    "DBSCAN_SERVICE_URL",
+    "http://localhost:8010/api/v1/analytics/clusters",
+)
 
 # ---------------------------------------------------------------------------
 # Logging

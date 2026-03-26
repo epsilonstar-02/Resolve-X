@@ -18,7 +18,7 @@ const app = express();
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
 
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,http://127.0.0.1:3000')
   .split(',').map(o => o.trim());
 
 app.use(cors({

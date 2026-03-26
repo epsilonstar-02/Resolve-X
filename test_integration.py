@@ -1,13 +1,14 @@
 import requests
 import time
 import sys
+import os
 
 # ---------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------
-VM_IP = "localhost" # Changed from 35.188.144.29 to localhost
-DBSCAN_URL = "http://localhost:8010"
-RISK_URL = "http://localhost:8020"
+VM_IP = os.getenv("RESOLVEX_VM_IP", "35.188.144.29")
+DBSCAN_URL = os.getenv("RESOLVEX_DBSCAN_URL", f"http://{VM_IP}:8010")
+RISK_URL = os.getenv("RESOLVEX_RISK_URL", f"http://{VM_IP}:8020")
 
 def test_service_health(name, url):
     print(f"[*] Checking health of {name} at {url}...")

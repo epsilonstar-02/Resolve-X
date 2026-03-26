@@ -2,15 +2,16 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter }            from 'next/navigation';
-import { useAuthStore }         from '../../../store/auth';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '../../../store/auth';
 import { getComplaints, updateStatus } from '../../../utils/api';
 import { addWebSocketListener } from '../../../utils/ws';
-import SandboxBanner            from '../../../components/SandboxBanner';
+import SandboxBanner from '../../../components/SandboxBanner';
 import type { Complaint } from '../../../utils/types';
 
 const DEMO_MODE = process.env.NEXT_PUBLIC_MODE === 'demo';
-const RISK_URL  = process.env.NEXT_PUBLIC_RISK_URL || 'http://localhost:8020';
+const runtimeHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+const RISK_URL  = process.env.NEXT_PUBLIC_RISK_URL || `http://${runtimeHost}:8020`;
 
 const STATUS_COLORS: Record<string, string> = {
   pending:     'bg-slate-800 text-[var(--grey-text-light)] border border-slate-700',
