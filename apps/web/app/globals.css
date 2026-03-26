@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+:root {
+  --new-bg: #f9f9f9;
+  --text-main: #1a0b54;
+  --grey-text-light: #a997ce;
+  --grey-text-dark: #83799e;
+  --white: white;
+  --light-grey: #f9f9f9;
+  --transparent: transparent;
+  --main-dark-bg: #13101c;
+  --secondary-dark: #1a1326;
+  --navy-dark: #300681;
+  --blue: #1c4eff;
+  --navy: #1b4dfe;
+  --pink: #f79fff;
+  --orange: #fe881b;
+  --yellow: #ffd600;
+  --black: #0e0e0e;
+  --purple: #ac24ff;
+  --grey: #bdbdd3;
+  --light-navy: #f2f2ff;
+  --darkest: #100828;
+}
+
+@theme inline {
+  --color-brand-bg: var(--main-dark-bg);
+  --color-brand-card: var(--secondary-dark);
+  --color-brand-blue: var(--blue);
+  --color-brand-purple: var(--purple);
+  --color-brand-pink: var(--pink);
+  --color-brand-orange: var(--orange);
+}
+
+body {
+  /* EternaCloud Base Styles */
+  background-color: var(--main-dark-bg);
+  color: #fff;
+  letter-spacing: -.02vw;
+  font-family: 'Outfit', 'Inter', Arial, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Hide scrollbar but keep functionality */
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* W-Mod Touch Fix from original input */
+html.w-mod-touch * {
+  background-attachment: scroll !important;
+}
