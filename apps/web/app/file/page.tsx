@@ -207,8 +207,15 @@ export default function ComplaintFilingWizard() {
           </div>
         )}
 
-        {/* Multi-issue detection card — shown for selected category */}
-        {category && <IssueAnalysisCard category={category as string} />}
+        {/* Multi-issue detection card — calls live classifier */}
+        {category && latitude && longitude && (
+          <IssueAnalysisCard
+            category={category as string}
+            latitude={latitude}
+            longitude={longitude}
+            imageUrl={fileUrls[0] ?? null}
+          />
+        )}
 
         <WizardNav
           onBack={() => setStep(2)}
