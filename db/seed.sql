@@ -7,6 +7,8 @@
 -- demo reset (DELETE /api/v1/admin/demo/reset → Ctrl+Shift+R).
 -- Apply with: psql $DATABASE_URL -f seed.sql
 -- ============================================================
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- FIX 1: Departments inserted first — officers need dept_id FKs
 -- FIX 2: Officers assigned real dept_ids — original had NULL for all dept_ids,
 --         meaning the routing engine would always find zero officers per dept
@@ -67,10 +69,25 @@ ON CONFLICT (email) DO NOTHING;
 
 -- ── Commissioner account ──────────────────────────────────────────────────────
 
-INSERT INTO users (id, name, email, role, city_id, is_active) VALUES
+INSERT INTO users (
+  id, name, email, role, city_id, employee_id, password_hash, totp_secret, is_active
+) VALUES
   ('b0000000-0000-0000-0000-000000000001',
-   'Commissioner', 'commissioner@resolvex.in', 'commissioner', 'DELHI', true)
-ON CONFLICT (email) DO NOTHING;
+   'Commissioner',
+   'commissioner@resolvex.in',
+   'commissioner',
+   'DELHI',
+   'DEV-COMMISSIONER-001',
+   crypt('CommDev@123', gen_salt('bf', 12)),
+   'JBSWY3DPEHPK3PXP',
+   true)
+ON CONFLICT (email) DO UPDATE SET
+  role          = EXCLUDED.role,
+  city_id       = EXCLUDED.city_id,
+  employee_id   = EXCLUDED.employee_id,
+  password_hash = EXCLUDED.password_hash,
+  totp_secret   = EXCLUDED.totp_secret,
+  is_active     = EXCLUDED.is_active;
 
 -- ── Officers (2 per department, assigned real dept_ids) ───────────────────────
 

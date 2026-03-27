@@ -74,6 +74,17 @@ const OTP_RATE_LIMIT  = 3;
 const OTP_RATE_WINDOW = 900;   // 15 minutes
 const SALT_ROUNDS     = 12;
 const IS_DEMO         = process.env.DEMO_MODE === 'true';
+const IS_PRODUCTION   = process.env.NODE_ENV === 'production';
+
+// Development-only commissioner login bootstrap. Keep disabled by default.
+const ENABLE_DEV_COMMISSIONER_LOGIN =
+  !IS_PRODUCTION && process.env.ENABLE_DEV_COMMISSIONER_LOGIN === 'true';
+const DEV_COMMISSIONER_EMPLOYEE_ID =
+  process.env.DEV_COMMISSIONER_EMPLOYEE_ID || 'DEV-COMMISSIONER-001';
+const DEV_COMMISSIONER_PASSWORD =
+  process.env.DEV_COMMISSIONER_PASSWORD || 'CommDev@123';
+const DEV_COMMISSIONER_TOTP =
+  process.env.DEV_COMMISSIONER_TOTP || '123456';
 
 // OTP provider defaults to twilio in production to avoid accidental mock fallback.
 const OTP_PROVIDER = (
@@ -349,11 +360,41 @@ router.post('/login', async (req, res) => {
       'SELECT * FROM users WHERE employee_id = $1 AND is_active = true',
       [employee_id]
     );
-    if (!rows.length) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+
+    let user = rows[0] || null;
+    let isDevCommissionerLogin = false;
+
+    if (!user && ENABLE_DEV_COMMISSIONER_LOGIN) {
+      const employeeIdMatches = employee_id === DEV_COMMISSIONER_EMPLOYEE_ID;
+      const passwordMatches = password === DEV_COMMISSIONER_PASSWORD;
+
+      if (employeeIdMatches && passwordMatches) {
+        const commissionerRows = await db.query(
+          `SELECT *
+           FROM users
+           WHERE role = 'commissioner' AND is_active = true
+           ORDER BY created_at ASC
+           LIMIT 1`
+        );
+
+        if (commissionerRows.rows.length) {
+          user = commissionerRows.rows[0];
+          isDevCommissionerLogin = true;
+
+          if (user.employee_id !== DEV_COMMISSIONER_EMPLOYEE_ID) {
+            await db.query(
+              'UPDATE users SET employee_id = $1 WHERE id = $2',
+              [DEV_COMMISSIONER_EMPLOYEE_ID, user.id]
+            );
+            user.employee_id = DEV_COMMISSIONER_EMPLOYEE_ID;
+          }
+        }
+      }
     }
 
-    const user = rows[0];
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
     const lockKey = `login:lock:${user.id}`;
     const locked  = await redisClient.get(lockKey);
@@ -361,7 +402,10 @@ router.post('/login', async (req, res) => {
       return res.status(429).json({ error: 'Account locked. Contact IT helpdesk.' });
     }
 
-    const valid = await bcrypt.compare(password, user.password_hash);
+    const valid = isDevCommissionerLogin
+      ? true
+      : Boolean(user.password_hash) && await bcrypt.compare(password, user.password_hash);
+
     if (!valid) {
       const failKey   = `login:fail:${user.id}`;
       const failCount = await redisClient.incr(failKey);
@@ -408,7 +452,12 @@ router.post('/login/2fa', async (req, res) => {
 
     const user = rows[0];
 
-    const totpValid = speakeasy.totp.verify({
+    const isDevCommissionerBypass =
+      ENABLE_DEV_COMMISSIONER_LOGIN
+      && user.role === 'commissioner'
+      && String(totp) === String(DEV_COMMISSIONER_TOTP);
+
+    const totpValid = isDevCommissionerBypass || speakeasy.totp.verify({
       secret:   user.totp_secret,
       encoding: 'base32',
       token:    String(totp),
