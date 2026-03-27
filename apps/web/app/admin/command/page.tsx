@@ -7,10 +7,11 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../store/auth';
-import { getComplaints, getRiskZones, getRiskAlerts } from '../../../utils/api';
+import { getComplaints, getRiskZones } from '../../../utils/api';
 import { addWebSocketListener } from '../../../utils/ws';
 import SandboxBanner from '../../../components/SandboxBanner';
-import type { Complaint, RiskZone, RiskAlert } from '../../../utils/types';
+import EarlyWarningPanel from '../../../components/EarlyWarningPanel';
+import type { Complaint, RiskZone } from '../../../utils/types';
 
 const DEMO_MODE = process.env.NEXT_PUBLIC_MODE === 'demo';
 const BASE      = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
@@ -28,7 +29,6 @@ export default function CityCommand() {
 
   const [complaints, setComplaints]   = useState<Complaint[]>([]);
   const [riskZones, setRiskZones]     = useState<RiskZone[]>([]);
-  const [alerts, setAlerts]           = useState<RiskAlert[]>([]);
   const [loading, setLoading]         = useState(true);
   const [resetting, setResetting]     = useState(false);
   const [activeTab, setActiveTab]     = useState<'feed'|'risk'|'dept'>('feed');
@@ -42,10 +42,9 @@ export default function CityCommand() {
     if (!token) return;
     try {
       // Fetch complaints from main API + risk data from risk service in parallel
-      const [compRes, zonesRes, alertsRes] = await Promise.allSettled([
-        fetch(`${BASE}/complaints`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+      const [compRes, zonesRes] = await Promise.allSettled([
+        getComplaints(token),
         getRiskZones(),
-        getRiskAlerts(),
       ]);
 
       if (compRes.status === 'fulfilled') {
@@ -53,9 +52,6 @@ export default function CityCommand() {
       }
       if (zonesRes.status === 'fulfilled') {
         setRiskZones(zonesRes.value.zones ?? []);
-      }
-      if (alertsRes.status === 'fulfilled') {
-        setAlerts(alertsRes.value.alerts ?? []);
       }
     } catch { /* non-fatal */ } finally { setLoading(false); }
   }, [token]);
@@ -150,25 +146,7 @@ export default function CityCommand() {
       <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
 
         {/* Early warnings from risk service */}
-        {alerts.filter(a => a.risk_level === 'High' || a.risk_level === 'Critical').length > 0 && (
-          <div className="space-y-2">
-            {alerts
-              .filter(a => a.risk_level === 'High' || a.risk_level === 'Critical')
-              .map((alert, i: number) => {
-                const cfg = RISK_CONFIG[alert.risk_level] ?? RISK_CONFIG.Medium;
-                return (
-                  <div key={i} className={`flex items-start gap-3 px-4 py-3 rounded-xl border ${cfg.color}`}>
-                    <span className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${cfg.dot}`} />
-                    <div>
-                      <p className="text-sm font-semibold">{alert.ward_id}</p>
-                      <p className="text-xs opacity-80">{alert.alert_text}</p>
-                    </div>
-                    <span className="ml-auto text-xs font-semibold uppercase opacity-70">{alert.risk_level}</span>
-                  </div>
-                );
-              })}
-          </div>
-        )}
+        <EarlyWarningPanel />
 
         {/* City KPIs */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

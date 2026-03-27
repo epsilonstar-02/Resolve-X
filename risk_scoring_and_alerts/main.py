@@ -370,6 +370,16 @@ def _geojson_to_raw_clusters(feature_collection: dict[str, Any]) -> list[RawClus
     """
     Transform GeoJSON FeatureCollection (from RX-021) into internal RawCluster rows.
     """
+    # Map raw category codes from the DB to human-readable names used by CATEGORY_WEIGHTS
+    CATEGORY_CODE_TO_NAME: dict[str, str] = {
+        "CAT-01": "Roads",
+        "CAT-02": "Drainage",
+        "CAT-03": "Electricity",
+        "CAT-04": "Sanitation",
+        "CAT-05": "Water Supply",
+        "CAT-06": "Garbage",
+    }
+
     clusters = []
     for feature in feature_collection.get("features", []):
         props = feature.get("properties", {})
@@ -409,6 +419,10 @@ def _geojson_to_raw_clusters(feature_collection: dict[str, Any]) -> list[RawClus
             if dist > max_dist:
                 max_dist = dist
 
+        # Resolve category code to human name for proper weight lookup
+        raw_category = props.get("primary_category", "Other")
+        resolved_category = CATEGORY_CODE_TO_NAME.get(raw_category, raw_category)
+
         clusters.append(RawCluster(
             cluster_id       = props.get("cluster_id", -1),
             ward_id          = props.get("ward_id", "Unknown"),
@@ -416,7 +430,7 @@ def _geojson_to_raw_clusters(feature_collection: dict[str, Any]) -> list[RawClus
             centroid_lng     = centroid_lng,
             radius_m         = max_dist if max_dist > 0 else 100.0,
             complaint_count  = props.get("complaint_count", 0),
-            primary_category = props.get("primary_category", "Other")
+            primary_category = resolved_category,
         ))
     return clusters
 

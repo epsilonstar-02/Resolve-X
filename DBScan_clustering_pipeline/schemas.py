@@ -79,6 +79,10 @@ class ClusterProperties(BaseModel):
         ...,
         description="Most frequent complaint category within the cluster.",
     )
+    ward_id: str = Field(
+        default="Unknown",
+        description="Most frequent ward_id among complaints in this cluster.",
+    )
 
 
 # ---------------------------------------------------------------------------

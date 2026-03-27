@@ -10,7 +10,8 @@ import type { ApiErrorLike } from '../../../utils/types';
 
 type Step = 'credentials' | 'totp';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL;
+const _host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+const BASE = process.env.NEXT_PUBLIC_API_URL || `http://${_host}:4000/api/v1`;
 
 async function staffLogin(employee_id: string, password: string) {
   const res = await fetch(`${BASE}/auth/login`, {

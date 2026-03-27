@@ -105,6 +105,7 @@ services:
       S3_BUCKET:     complaint-media
       # S3_PUBLIC_URL must be browser-reachable from outside Docker.
       S3_PUBLIC_URL: http://${PUBLIC_HOST}:9000
+      ENABLE_DEV_COMMISSIONER_LOGIN: 'true'
     volumes:
       - ./apps/api:/app              # live reload in dev
       - /app/node_modules            # prevent host node_modules overwriting container's

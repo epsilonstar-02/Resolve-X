@@ -109,6 +109,7 @@ _FETCH_TRUSTED_COMPLAINTS_SQL = """
     SELECT
         id AS complaint_id,
         category,
+        ward_id,
         ST_Y(location::geometry)  AS latitude,
         ST_X(location::geometry)  AS longitude
     FROM
@@ -239,6 +240,7 @@ def _build_feature(
     cluster_id: int,
     coords_deg: np.ndarray,
     categories: list[str],
+    ward_ids: list[str],
 ) -> ClusterFeature:
     """Build a single GeoJSON Feature for one DBSCAN cluster.
 
@@ -249,12 +251,17 @@ def _build_feature(
         cluster_id:  DBSCAN label for this cluster (≥ 0).
         coords_deg:  All complaint coordinates in the cluster [[lat, lon], ...].
         categories:  Complaint category string per point (same order as coords).
+        ward_ids:    Ward ID string per point (same order as coords).
 
     Returns:
         ClusterFeature ready for serialisation.
     """
     # --- primary category: modal value --------------------------------------
     most_common_category, _ = Counter(categories).most_common(1)[0]
+
+    # --- primary ward_id: modal value ---------------------------------------
+    valid_wards = [w for w in ward_ids if w]
+    most_common_ward = Counter(valid_wards).most_common(1)[0][0] if valid_wards else "Unknown"
 
     # --- geometry -----------------------------------------------------------
     try:
@@ -274,6 +281,7 @@ def _build_feature(
             cluster_id=cluster_id,
             complaint_count=len(categories),
             primary_category=most_common_category,
+            ward_id=most_common_ward,
         ),
     )
 
@@ -328,6 +336,7 @@ async def get_cluster_feature_collection(
         dtype=np.float64,
     )
     categories: list[str] = [row["category"] for row in rows]
+    ward_ids: list[str] = [row.get("ward_id", "") or "" for row in rows]
 
     # DBSCAN with haversine requires radians
     coords_rad = np.radians(coords_deg)
@@ -360,11 +369,15 @@ async def get_cluster_feature_collection(
         cluster_categories = [
             cat for cat, m in zip(categories, mask) if m
         ]
+        cluster_ward_ids = [
+            wid for wid, m in zip(ward_ids, mask) if m
+        ]
 
         feature = _build_feature(
             cluster_id=int(label),
             coords_deg=cluster_coords,
             categories=cluster_categories,
+            ward_ids=cluster_ward_ids,
         )
         features.append(feature)
 
