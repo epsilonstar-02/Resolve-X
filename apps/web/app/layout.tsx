@@ -27,13 +27,16 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className="bg-gray-50 text-gray-900 antialiased">
+      <body className="bg-[var(--main-dark-bg)] text-white antialiased">
         <SandboxBanner demoMode={demoMode} />
-        <nav className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-          <Link href="/" className="font-bold text-indigo-600 tracking-tight">
-            ResolveX
+        <nav className="bg-[var(--secondary-dark)]/80 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+          <Link href="/" className="flex items-center gap-2.5">
+            <img src="/logo.png" alt="ResolveX Logo" className="w-6 h-6 object-contain drop-shadow-sm" />
+            <span className="font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent tracking-wide text-lg">
+              ResolveX
+            </span>
           </Link>
-          <Link href="/file" className="text-sm text-indigo-600 font-medium hover:underline">
+          <Link href="/file" className="text-sm text-[var(--blue)] font-medium hover:text-white hover:underline transition-colors">
             Report issue
           </Link>
         </nav>

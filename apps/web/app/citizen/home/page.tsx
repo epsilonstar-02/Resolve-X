@@ -16,12 +16,12 @@ const DEMO_MODE = process.env.NEXT_PUBLIC_MODE === 'demo';
 const BASE      = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  pending:     { label: 'Pending',     color: 'text-[var(--grey-text-light)]',   bg: 'bg-slate-100',     dot: 'bg-slate-400'   },
-  assigned:    { label: 'Assigned',    color: 'text-blue-700',    bg: 'bg-blue-50',       dot: 'bg-blue-500'   },
-  in_progress: { label: 'In Progress', color: 'text-blue-800',    bg: 'bg-blue-100',      dot: 'bg-blue-600'   },
-  escalated:   { label: 'Escalated',   color: 'text-red-700',     bg: 'bg-red-50',        dot: 'bg-red-500'    },
-  resolved:    { label: 'Resolved',    color: 'text-emerald-700', bg: 'bg-emerald-50',    dot: 'bg-emerald-500'},
-  closed:      { label: 'Closed',      color: 'text-[var(--grey-text-dark)]',   bg: 'bg-slate-100',     dot: 'bg-slate-300'  },
+  pending:     { label: 'Pending',     color: 'text-slate-300',     bg: 'bg-slate-500/20',     dot: 'bg-slate-400'   },
+  assigned:    { label: 'Assigned',    color: 'text-blue-300',      bg: 'bg-blue-500/20',      dot: 'bg-blue-400'   },
+  in_progress: { label: 'In Progress', color: 'text-blue-300',      bg: 'bg-blue-500/20',      dot: 'bg-blue-500'   },
+  escalated:   { label: 'Escalated',   color: 'text-red-300',       bg: 'bg-red-500/20',       dot: 'bg-red-400'    },
+  resolved:    { label: 'Resolved',    color: 'text-emerald-300',   bg: 'bg-emerald-500/20',   dot: 'bg-emerald-400'},
+  closed:      { label: 'Closed',      color: 'text-slate-400',     bg: 'bg-slate-500/20',     dot: 'bg-slate-500'  },
 };
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -51,11 +51,11 @@ function SLAProgress({ slaDeadline, createdAt, status, now }: {
 
   return (
     <div className="mt-3">
-      <div className="flex justify-between text-xs text-[var(--grey-text-dark)] mb-1">
+      <div className="flex justify-between text-xs text-[var(--grey-text-light)] mb-1">
         <span>SLA</span>
-        <span className={pct >= 100 ? 'text-red-500 font-medium' : ''}>{label}</span>
+        <span className={pct >= 100 ? 'text-red-400 font-medium' : ''}>{label}</span>
       </div>
-      <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
+      <div className="h-1 bg-white/10 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-700 ${color}`}
           style={{ width: `${pct}%` }}
@@ -133,21 +133,27 @@ export default function CitizenHome() {
   };
 
   return (
-    <main className="min-h-screen text-white bg-[var(--main-dark-bg)] w-full">
-      <SandboxBanner demoMode={DEMO_MODE} />
+    <main className="min-h-screen text-white bg-[var(--main-dark-bg)] w-full relative overflow-hidden">
+      {/* Background Mesh Gradient */}
+      <div className="absolute inset-x-0 top-[-10%] h-[800px] w-full pointer-events-none opacity-80 z-0">
+        <div className="absolute top-0 right-[15%] w-[600px] h-[600px] rounded-full bg-[var(--purple)] blur-[120px] mix-blend-screen opacity-50" />
+        <div className="absolute top-[10%] left-[10%] w-[500px] h-[500px] rounded-full bg-[var(--blue)] blur-[100px] mix-blend-screen opacity-40" />
+        <div className="absolute top-[30%] left-[40%] w-[400px] h-[400px] rounded-full bg-[var(--pink)] blur-[120px] mix-blend-screen opacity-30" />
+        <div className="absolute top-[-5%] left-[30%] w-[400px] h-[400px] rounded-full bg-[var(--orange)] blur-[100px] mix-blend-screen opacity-20" />
+      </div>
 
-      {/* Header */}
-      <div className="border-b border-white/[0.06] backdrop-blur-md px-4 py-4 flex items-center justify-between">
+      <div className="relative z-10 w-full min-h-screen">
+        {/* Header */}
+      <div className="border-b border-white/10 backdrop-blur-md px-4 py-4 flex items-center justify-between bg-white/[0.03]">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="ResolveX" className="drop-shadow-sm" style={{ width: 44, height: 44, objectFit: 'contain' }} />
           <div>
-            <p className="text-xs text-[var(--grey-text-dark)]">{greeting}</p>
-            <h1 className="text-lg font-semibold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">ResolveX</h1>
+            <p className="text-xs text-[var(--grey-text-light)] drop-shadow-sm">{greeting}</p>
+            <h1 className="text-lg font-semibold text-white drop-shadow-sm tracking-tight">Citizen Portal</h1>
           </div>
         </div>
         <button
           onClick={handleLogout}
-          className="text-xs text-[var(--grey-text-dark)] hover:text-[var(--grey-text-light)] transition-colors"
+          className="text-xs text-[var(--grey-text-light)] hover:text-white transition-colors"
         >
           Sign out
         </button>
@@ -174,13 +180,7 @@ export default function CitizenHome() {
           <div className="relative">
             <p className="text-emerald-300/80 text-sm mb-1">See something broken?</p>
             <h2 className="text-2xl font-bold mb-4">Report an issue</h2>
-            <Link
-              href="/file"
-              className="inline-flex items-center gap-2 bg-[#0f1629] text-blue-900
-                         font-semibold text-sm px-6 py-3 rounded-xl
-                         shadow-lg shadow-white/20 hover:bg-emerald-50
-                         transition-all active:scale-95"
-            >
+            <Link href="/file" className="inline-flex items-center gap-2 bg-white text-blue-700 font-semibold text-sm px-6 py-3 rounded-xl shadow-lg shadow-black/20 hover:bg-blue-50 transition-all active:scale-95">
               <span>📍</span>
               File complaint
             </Link>
@@ -209,10 +209,7 @@ export default function CitizenHome() {
             <button
               key={action.label}
               onClick={action.onClick ?? (() => router.push(action.href))}
-              className="flex flex-col items-center gap-2 rounded-2xl p-4
-                         bg-[var(--secondary-dark)] border border-white/5 shadow-[0_4px_16px_rgba(0,0,0,0.3)]
-                         hover:border-white/10 hover:bg-[#1f162e] hover:shadow-lg hover:-translate-y-1
-                         transition-all duration-300 ease-out active:scale-95 text-center"
+              className="flex flex-col items-center gap-2 rounded-2xl p-4 bg-[var(--secondary-dark)] border border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.3)] hover:border-white/20 hover:bg-[#252b50] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out active:scale-95 text-center"
             >
               <span className="text-2xl">{action.icon}</span>
               <span className="text-xs text-[var(--grey-text-light)] font-medium leading-tight">
@@ -240,14 +237,14 @@ export default function CitizenHome() {
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="rounded-2xl border border-white/5 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.5)]  p-4 animate-pulse h-24" />
+                <div key={i} className="rounded-2xl border border-white/10 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.4)]  p-4 animate-pulse h-24" />
               ))}
             </div>
           ) : complaints.length === 0 ? (
-            <div className="rounded-2xl border border-white/5 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.5)]  p-8 text-center border border-white/[0.06]">
+            <div className="rounded-2xl border border-white/10 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.4)]  p-8 text-center">
               <p className="text-3xl mb-2">📭</p>
-              <p className="text-sm text-[var(--grey-text-dark)]">No complaints yet</p>
-              <p className="text-xs text-[var(--grey-text-dark)] mt-1">
+              <p className="text-sm text-[var(--grey-text-light)]">No complaints yet</p>
+              <p className="text-xs text-[var(--grey-text-light)] mt-1">
                 File your first complaint using the button above
               </p>
             </div>
@@ -259,9 +256,7 @@ export default function CitizenHome() {
                   <div
                     key={c.id}
                     onClick={() => router.push(`/track/${c.id}`)}
-                    className="rounded-2xl border border-white/5 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.5)]  p-4 border border-white/[0.06]
-                               shadow-lg shadow-black/20 hover:shadow-xl hover:-translate-y-0.5
-                               transition-all duration-200 cursor-pointer active:scale-[0.99]"
+                    className="rounded-2xl border border-white/10 bg-[var(--secondary-dark)] p-4 shadow-lg shadow-black/20 hover:shadow-xl hover:-translate-y-0.5 hover:border-white/20 hover:bg-[#252b50] transition-all duration-200 cursor-pointer active:scale-[0.99]"
                     style={{
                       opacity:    visible ? 1 : 0,
                       transform:  visible ? 'translateY(0)' : 'translateY(8px)',
@@ -285,7 +280,7 @@ export default function CitizenHome() {
                           </span>
                         </div>
                         {c.description && (
-                          <p className="text-xs text-[var(--grey-text-dark)] truncate">{c.description}</p>
+                          <p className="text-xs text-[var(--grey-text-light)] truncate">{c.description}</p>
                         )}
                         <p className="text-xs text-[var(--grey-text-light)] mt-1">
                           {c.created_at
@@ -315,18 +310,19 @@ export default function CitizenHome() {
         {/* Demo mode tip */}
         {DEMO_MODE && (
           <div
-            className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3
-                       text-xs text-amber-700"
+            className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3
+                       text-xs text-amber-300"
             style={{
               opacity:    visible ? 1 : 0,
               transition: 'opacity 400ms 400ms',
             }}
           >
-            <span className="font-semibold">Demo mode</span> — complaints are
-            illustrative. Press <kbd className="bg-amber-100 px-1 rounded">Ctrl+Shift+R</kbd> on
+            <span className="font-semibold text-amber-400">Demo mode</span> — complaints are
+            illustrative. Press <kbd className="bg-amber-500/20 text-amber-200 px-1 rounded">Ctrl+Shift+R</kbd> on
             the admin map to reset.
           </div>
         )}
+      </div>
       </div>
     </main>
   );
