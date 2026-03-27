@@ -36,7 +36,11 @@ INSERT INTO departments (id, name, code, city_id) VALUES
   ('a0000000-0000-0000-0000-000000000003', 'Electrical Department',  'ELECTRICAL', 'DELHI'),
   ('a0000000-0000-0000-0000-000000000004', 'Water Department',       'WATER',      'DELHI'),
   ('a0000000-0000-0000-0000-000000000005', 'Sanitation Department',  'SANITATION', 'DELHI'),
-  ('a0000000-0000-0000-0000-000000000006', 'General Department',     'GENERAL',    'DELHI');
+  ('a0000000-0000-0000-0000-000000000006', 'General Department',     'GENERAL',    'DELHI')
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  code = EXCLUDED.code,
+  city_id = EXCLUDED.city_id;
 
 -- ── Wards (real Delhi approximate boundaries) ─────────────────────────────────
 -- Ward boundaries are approximate rectangles in Delhi.
@@ -53,12 +57,16 @@ INSERT INTO wards (id, name, city_id, boundary, risk_score, risk_label) VALUES
 
   ('DEMO_WARD', 'Demo Ward — Bharat Mandapam', 'DELHI',
    ST_GeomFromText('POLYGON((77.195 28.595, 77.225 28.595, 77.225 28.625, 77.195 28.625, 77.195 28.595))', 4326),
-   0.76, '76% flood risk before monsoon season');
+   0.76, '76% flood risk before monsoon season')
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name, city_id = EXCLUDED.city_id, boundary = EXCLUDED.boundary, risk_score = EXCLUDED.risk_score, risk_label = EXCLUDED.risk_label;
 
 -- City boundary polygon for geo-validation (covers all three wards + buffer)
 INSERT INTO wards (id, name, city_id, boundary) VALUES
   ('CITY_BOUNDARY', 'Delhi Service Area', 'DELHI',
-   ST_GeomFromText('POLYGON((77.10 28.40, 77.50 28.40, 77.50 28.90, 77.10 28.90, 77.10 28.40))', 4326));
+   ST_GeomFromText('POLYGON((77.10 28.40, 77.50 28.40, 77.50 28.90, 77.10 28.90, 77.10 28.40))', 4326))
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name, city_id = EXCLUDED.city_id, boundary = EXCLUDED.boundary;
 
 -- ── Demo citizen account ──────────────────────────────────────────────────────
 
@@ -103,7 +111,16 @@ INSERT INTO users (id, name, role, dept_id, ward_id, city_id, email, employee_id
   (gen_random_uuid(),'Officer Sanitation 1', 'officer','a0000000-0000-0000-0000-000000000005','DEMO_WARD','DELHI','officer.sanitation1@resolvex.in','DELHI-DW-SAN-001',    true,'$2b$10$jMf/4lzgKTr35KkjQ8jOVO03S.g8cjYIDb4pqdlyO4DW.dzHuDKyu'),
   (gen_random_uuid(),'Officer Sanitation 2', 'officer','a0000000-0000-0000-0000-000000000005','W22',      'DELHI','officer.sanitation2@resolvex.in','DELHI-W22-SAN-002',   true,'$2b$10$jMf/4lzgKTr35KkjQ8jOVO03S.g8cjYIDb4pqdlyO4DW.dzHuDKyu'),
   (gen_random_uuid(),'Officer General 1',    'officer','a0000000-0000-0000-0000-000000000006','W14',      'DELHI','officer.general1@resolvex.in',   'DELHI-W14-GEN-001',   true,'$2b$10$jMf/4lzgKTr35KkjQ8jOVO03S.g8cjYIDb4pqdlyO4DW.dzHuDKyu'),
-  (gen_random_uuid(),'Officer General 2',    'officer','a0000000-0000-0000-0000-000000000006','DEMO_WARD','DELHI','officer.general2@resolvex.in',   'DELHI-DW-GEN-002',    true,'$2b$10$jMf/4lzgKTr35KkjQ8jOVO03S.g8cjYIDb4pqdlyO4DW.dzHuDKyu');
+  (gen_random_uuid(),'Officer General 2',    'officer','a0000000-0000-0000-0000-000000000006','DEMO_WARD','DELHI','officer.general2@resolvex.in',   'DELHI-DW-GEN-002',    true,'$2b$10$jMf/4lzgKTr35KkjQ8jOVO03S.g8cjYIDb4pqdlyO4DW.dzHuDKyu')
+ON CONFLICT (email) DO UPDATE SET
+  name = EXCLUDED.name,
+  role = EXCLUDED.role,
+  dept_id = EXCLUDED.dept_id,
+  ward_id = EXCLUDED.ward_id,
+  city_id = EXCLUDED.city_id,
+  employee_id = EXCLUDED.employee_id,
+  is_active = EXCLUDED.is_active,
+  password_hash = EXCLUDED.password_hash;
 
 -- ── 60 Seed Complaints with real GPS coordinates ──────────────────────────────
 -- All: source='production', officer_verified=true → solid markers on map

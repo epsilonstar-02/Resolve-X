@@ -85,9 +85,9 @@ Once successfully running, services will map to following ports:
 
 ### Populating Seed Data
 Populate the database with foundational schemas (categories, departments, roles, mock 60-complaint data).
-Run the seed initialization script embedded at the root:
+Run the SQL seed initialization script against the running Postgres container:
 ```bash
-node seed.js
+docker compose exec -T postgres psql -U resolvex -d resolvex < db/seed.sql
 ```
 
 ## 👥 Meet the Team (India Innovates 2026)
