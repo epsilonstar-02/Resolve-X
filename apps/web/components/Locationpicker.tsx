@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -64,27 +64,30 @@ function DraggableMarker({
     },
   });
  
-  const eventHandlers = {
-    dragend() {
-      const marker = markerRef.current;
-      if (!marker) return;
-      let { lat, lng } = marker.getLatLng();
-      if (demoMode) {
-        const inside = (
-          lat >= demoBbox.latMin && lat <= demoBbox.latMax &&
-          lng >= demoBbox.lngMin && lng <= demoBbox.lngMax
-        );
-        if (!inside) {
-          const clamped = clampToBbox(lat, lng, demoBbox);
-          lat = clamped.lat;
-          lng = clamped.lng;
-          marker.setLatLng([lat, lng]);
-          onToast('Location must be within demo ward');
+  const eventHandlers = useMemo(
+    () => ({
+      dragend() {
+        const marker = markerRef.current;
+        if (!marker) return;
+        let { lat, lng } = marker.getLatLng();
+        if (demoMode) {
+          const inside = (
+            lat >= demoBbox.latMin && lat <= demoBbox.latMax &&
+            lng >= demoBbox.lngMin && lng <= demoBbox.lngMax
+          );
+          if (!inside) {
+            const clamped = clampToBbox(lat, lng, demoBbox);
+            lat = clamped.lat;
+            lng = clamped.lng;
+            marker.setLatLng([lat, lng]);
+            onToast('Location must be within demo ward');
+          }
         }
-      }
-      onMove(lat, lng);
-    },
-  };
+        onMove(lat, lng);
+      },
+    }),
+    [demoMode, demoBbox, onMove, onToast],
+  );
  
   return (
     <Marker
@@ -102,15 +105,15 @@ export default function LocationPicker({ center, demoMode, demoBbox, onLocationC
   const [toast, setToast]           = useState<string | null>(null);
  
   // Show geo-fence toast for 3 seconds then hide
-  const showToast = (msg: string) => {
+  const showToast = useCallback((msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
-  };
+  }, []);
  
-  const handleMove = (lat: number, lng: number) => {
+  const handleMove = useCallback((lat: number, lng: number) => {
     setPosition({ lat, lng });
     onLocationChange(lat, lng);
-  };
+  }, [onLocationChange]);
  
   // GPS auto-capture on mount
   useEffect(() => {

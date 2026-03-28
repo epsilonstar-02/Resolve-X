@@ -172,9 +172,9 @@ export default function ComplaintFilingWizard() {
         <button
           onClick={() => fileRef.current?.click()}
           disabled={uploading || fileUrls.length >= 3}
-          className="w-full h-32 border-2 border-dashed border-slate-300 rounded-xl
+          className="w-full h-32 border-2 border-dashed border-white/20 rounded-xl
                       flex flex-col items-center justify-center gap-2 text-[var(--grey-text-dark)]
-                     hover:border-emerald-400 hover:text-emerald-600 transition-colors
+                     hover:border-emerald-400 hover:text-emerald-400 transition-colors
                      disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {uploading
@@ -213,7 +213,7 @@ export default function ComplaintFilingWizard() {
             Description <span className="text-[var(--grey-text-dark)] font-normal">(optional)</span>
           </label>
           <textarea
-            className="w-full border border-slate-300 rounded-xl p-3 text-sm resize-none
+            className="w-full border border-white/20 bg-[var(--secondary-dark)] text-white rounded-xl p-3 text-sm resize-none
                        focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400"
             rows={3}
             placeholder="Any additional details about the issue…"
@@ -250,7 +250,7 @@ export default function ComplaintFilingWizard() {
         <h2 className="text-xl font-semibold text-white">Review & AI Analysis</h2>
 
         {/* Summary card */}
-        <div className="bg-slate-50 rounded-xl p-4 space-y-2 text-sm">
+        <div className="bg-[var(--secondary-dark)] rounded-xl p-4 space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-[var(--grey-text-dark)]">Category</span>
             <span className="font-medium text-white">{selectedCat?.label}</span>
@@ -314,7 +314,7 @@ export default function ComplaintFilingWizard() {
       </div>
 
       {complaintId && (
-        <div className="bg-slate-50 rounded-xl p-4 space-y-3 text-sm text-left">
+        <div className="bg-[var(--secondary-dark)] rounded-xl p-4 space-y-3 text-sm text-left">
           <div className="flex justify-between">
             <span className="text-[var(--grey-text-dark)]">Complaint ID</span>
             <span className="font-mono text-xs text-[var(--grey-text-light)] truncate max-w-[160px]">{complaintId}</span>
@@ -397,7 +397,7 @@ export default function ComplaintFilingWizard() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen">
       <div className="max-w-lg mx-auto px-4 py-8">
 
         {/* Progress indicator */}
