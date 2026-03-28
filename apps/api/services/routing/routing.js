@@ -7,6 +7,44 @@ const { getConnection, publish, createConsumer, QUEUES } = require('../../rabbit
 const { broadcast } = require('../notifications/notifications');
 
 const CLASSIFIER_URL = process.env.CLASSIFIER_URL || 'http://classifier:8000';
+const ROUTING_RETRY_MS = Number(process.env.ROUTING_ENGINE_RETRY_MS || 5000);
+
+const DEPT_CODE_ALIASES = {
+  ROADS:      ['ROADS', 'ROADS_DEPT'],
+  DRAINAGE:   ['DRAINAGE', 'DRN', 'DRAIN'],
+  ELECTRICAL: ['ELECTRICAL', 'ELEC', 'STREETLIGHT'],
+  SANITATION: ['SANITATION', 'WASTE', 'SWM'],
+  WATER:      ['WATER'],
+  GENERAL:    ['GENERAL'],
+};
+
+const CATEGORY_TO_DEPT_CODE = {
+  CAT_01: 'ROADS',
+  CAT_02: 'DRAINAGE',
+  CAT_03: 'ELECTRICAL',
+  CAT_04: 'SANITATION',
+  CAT_05: 'WATER',
+  CAT_06: 'GENERAL',
+  CAT_07: 'GENERAL',
+  CAT_08: 'GENERAL',
+  CAT_09: 'GENERAL',
+  CAT_10: 'GENERAL',
+  ROADS_AND_FOOTPATHS: 'ROADS',
+  DRAINAGE_AND_SEWAGE: 'DRAINAGE',
+  STREETLIGHTING: 'ELECTRICAL',
+  WASTE_AND_SANITATION: 'SANITATION',
+  WATER_SUPPLY: 'WATER',
+  PARKS_AND_PUBLIC_SPACES: 'GENERAL',
+  ENCROACHMENT_AND_ILLEGAL: 'GENERAL',
+  NOISE_AND_POLLUTION: 'GENERAL',
+  STRAY_ANIMALS: 'GENERAL',
+  OTHER_MISCELLANEOUS: 'GENERAL',
+  OTHER: 'GENERAL',
+};
+
+let routingConsumerChannel = null;
+let routingStartTimer = null;
+let isRoutingStarting = false;
 
 // ── SLA tier map (seconds) ────────────────────────────────────────────────────
 
@@ -15,6 +53,87 @@ const SLA_SECONDS = { 1: 86400, 2: 172800, 3: 259200, 4: 432000, 5: 864000 };
 function slaDeadline(priority) {
   const seconds = SLA_SECONDS[priority] || SLA_SECONDS[3];
   return new Date(Date.now() + seconds * 1000);
+}
+
+function normalizeCategoryKey(category) {
+  return String(category || '')
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+function getDepartmentCodeCandidates(category) {
+  const key = normalizeCategoryKey(category);
+  const mappedDeptCode = CATEGORY_TO_DEPT_CODE[key] || 'GENERAL';
+  const aliases = DEPT_CODE_ALIASES[mappedDeptCode] || DEPT_CODE_ALIASES.GENERAL;
+  return aliases.map((code) => String(code).toUpperCase());
+}
+
+async function findDepartmentForCategory(category) {
+  const candidates = getDepartmentCodeCandidates(category);
+
+  const { rows } = await pool.query(
+    `SELECT id, code
+     FROM departments
+     WHERE UPPER(code) = ANY($1::text[])
+     ORDER BY array_position($1::text[], UPPER(code))
+     LIMIT 1`,
+    [candidates]
+  );
+
+  if (rows.length) {
+    return {
+      deptId: rows[0].id,
+      deptCode: rows[0].code,
+      requestedCodes: candidates,
+    };
+  }
+
+  const { rows: generalRows } = await pool.query(
+    "SELECT id, code FROM departments WHERE UPPER(code) = 'GENERAL' LIMIT 1"
+  );
+
+  return {
+    deptId: generalRows[0]?.id || null,
+    deptCode: generalRows[0]?.code || null,
+    requestedCodes: candidates,
+  };
+}
+
+async function findLeastLoadedOfficer(deptId, wardId) {
+  const baseSelect =
+    `SELECT u.id, COUNT(t.id) AS open_tasks
+     FROM users u
+     LEFT JOIN tasks t
+       ON t.assigned_to = u.id
+       AND t.status NOT IN ('resolved', 'closed')
+     WHERE u.dept_id = $1
+       AND u.role IN ('officer', 'dept_head')
+       AND u.is_active = true`;
+
+  if (wardId) {
+    const { rows } = await pool.query(
+      `${baseSelect}
+       AND u.ward_id = $2
+       GROUP BY u.id
+       ORDER BY open_tasks ASC
+       LIMIT 1`,
+      [deptId, wardId]
+    );
+
+    if (rows.length) return rows[0].id;
+  }
+
+  const { rows } = await pool.query(
+    `${baseSelect}
+     GROUP BY u.id
+     ORDER BY open_tasks ASC
+     LIMIT 1`,
+    [deptId]
+  );
+
+  return rows[0]?.id || null;
 }
 
 // ── Integration 1: Call classifier:8000 instead of local classify() ──────────
@@ -55,117 +174,180 @@ async function classifyViaML({ description, category, latitude, longitude }) {
 // ── Routing engine ────────────────────────────────────────────────────────────
 
 async function startRoutingEngine() {
-  // Complaints are published to complaint.submitted by complaints.js.
-  await createConsumer(QUEUES.SUBMITTED, async (event) => {
-    const { complaint_id, citizen_id, category, description, location } = event;
-    const latitude  = location?.latitude  || 0;
-    const longitude = location?.longitude || 0;
+  if (routingConsumerChannel || isRoutingStarting) return;
+  if (!getConnection()) {
+    throw new Error('RabbitMQ not connected yet');
+  }
 
-    // ── Step 1: ML classification (Integration 1) ─────────────────────────
-    const { category: mlCategory, priority } = await classifyViaML({
-      description, category, latitude, longitude,
-    });
+  isRoutingStarting = true;
 
-    // ── Step 2: Look up department by ML-returned category ────────────────
-    const { rows: deptRows } = await pool.query(
-      'SELECT id FROM departments WHERE code = $1 LIMIT 1',
-      [mlCategory]
-    );
+  try {
+    // Complaints are published to complaint.submitted by complaints.js.
+    const channel = await createConsumer(QUEUES.SUBMITTED, async (event) => {
+      const { complaint_id, citizen_id, category, description, location, ward_id } = event;
+      const latitude  = location?.latitude  || 0;
+      const longitude = location?.longitude || 0;
 
-    let deptId;
-    if (deptRows.length) {
-      deptId = deptRows[0].id;
-    } else {
-      const { rows: generalRows } = await pool.query(
-        "SELECT id FROM departments WHERE code = 'GENERAL' LIMIT 1"
+      // Idempotency guard: re-delivered messages should not create duplicate tasks.
+      const { rows: [currentComplaint] } = await pool.query(
+        `SELECT status, dept_id, assigned_to, sla_deadline
+         FROM complaints
+         WHERE id = $1
+         LIMIT 1`,
+        [complaint_id]
       );
-      deptId = generalRows[0]?.id;
+
+      if (!currentComplaint) {
+        console.warn(`Complaint ${complaint_id} not found. Skipping routing event.`);
+        return;
+      }
+
+      const { rows: [existingPrimaryTask] } = await pool.query(
+        `SELECT id, dept_id, assigned_to, sla_deadline
+         FROM tasks
+         WHERE complaint_id = $1
+           AND is_primary = true
+         ORDER BY created_at ASC
+         LIMIT 1`,
+        [complaint_id]
+      );
+
+      if (existingPrimaryTask) {
+        if (currentComplaint.status === 'pending') {
+          await pool.query(
+            `UPDATE complaints
+             SET dept_id      = COALESCE(dept_id, $1),
+                 assigned_to  = COALESCE(assigned_to, $2),
+                 sla_deadline = COALESCE(sla_deadline, $3),
+                 status       = 'assigned',
+                 updated_at   = now()
+             WHERE id = $4`,
+            [
+              existingPrimaryTask.dept_id,
+              existingPrimaryTask.assigned_to,
+              existingPrimaryTask.sla_deadline,
+              complaint_id,
+            ]
+          );
+        }
+
+        console.log(`Complaint ${complaint_id} already has primary task ${existingPrimaryTask.id}. Skipping duplicate routing.`);
+        return;
+      }
+
+      if (currentComplaint.status !== 'pending') {
+        console.log(`Complaint ${complaint_id} already in status ${currentComplaint.status}. Skipping routing.`);
+        return;
+      }
+
+      // ── Step 1: ML classification (Integration 1) ─────────────────────────
+      const { category: mlCategory, priority } = await classifyViaML({
+        description, category, latitude, longitude,
+      });
+
+      // ── Step 2: Look up department by ML-returned category ────────────────
+      const { deptId, deptCode, requestedCodes } = await findDepartmentForCategory(mlCategory);
+
+      if (!deptId) {
+        console.error(
+          `No department found for category ${mlCategory} (tried ${requestedCodes.join(', ')}), complaint ${complaint_id}`
+        );
+        return;
+      }
+
+      // ── Step 3: Find least-loaded officer ────────────────────────────────
+      const assignedTo = await findLeastLoadedOfficer(deptId, ward_id);
+      const deadline   = slaDeadline(priority);
+
+      // ── Step 4: Insert Task ───────────────────────────────────────────────
+      const { rows: [task] } = await pool.query(
+        `INSERT INTO tasks
+           (id, complaint_id, dept_id, assigned_to, is_primary,
+            status, sla_deadline, created_at, updated_at)
+         VALUES
+           (gen_random_uuid(), $1, $2, $3, true,
+            'open', $4, now(), now())
+         RETURNING id`,
+        [complaint_id, deptId, assignedTo, deadline]
+      );
+
+      // ── Step 5: Update complaint ──────────────────────────────────────────
+      await pool.query(
+        `UPDATE complaints
+         SET dept_id = $1, assigned_to = $2, status = 'assigned',
+             sla_deadline = $3, priority = $4, updated_at = now()
+         WHERE id = $5`,
+        [deptId, assignedTo, deadline, priority, complaint_id]
+      );
+
+      // ── Step 6: Audit trail ───────────────────────────────────────────────
+      await pool.query(
+        `INSERT INTO complaint_history
+           (id, complaint_id, actor_id, action, old_status, new_status, note, created_at)
+         VALUES
+           (gen_random_uuid(), $1, $2, 'assigned', 'pending', 'assigned', $3, now())`,
+        [complaint_id, assignedTo, `ML routed to dept ${deptCode || deptId} (category: ${mlCategory}, priority: ${priority})`]
+      );
+
+      // ── Step 7: Publish task.created ──────────────────────────────────────
+      await publish(QUEUES.TASK_CREATED, {
+        task_id:      task.id,
+        complaint_id,
+        officer_id:   assignedTo,
+        dept_id:      deptId,
+        sla_deadline: deadline,
+      });
+
+      broadcast({
+        type:         'task.assigned',
+        task_id:      task.id,
+        complaint_id,
+        officer_id:   assignedTo,
+        dept_id:      deptId,
+      });
+
+      // ── Step 8: WebSocket broadcast ───────────────────────────────────────
+      broadcast({
+        type:         'complaint.status_updated',
+        complaint_id,
+        citizen_id,
+        new_status:   'assigned',
+        dept_id:      deptId,
+      });
+
+      console.log(`Routed complaint ${complaint_id} → dept ${deptCode || deptId} (ML category: ${mlCategory}, priority: ${priority}), officer ${assignedTo}`);
+    });
+
+    routingConsumerChannel = channel;
+    routingConsumerChannel.on('close', () => {
+      routingConsumerChannel = null;
+      console.warn(`Routing consumer channel closed. Retrying in ${ROUTING_RETRY_MS}ms.`);
+      scheduleRoutingEngineStart(ROUTING_RETRY_MS);
+    });
+    routingConsumerChannel.on('error', (err) => {
+      console.error('Routing consumer channel error:', err.message);
+    });
+
+    console.log('Routing engine started');
+  } finally {
+    isRoutingStarting = false;
+  }
+}
+
+function scheduleRoutingEngineStart(delayMs = 0) {
+  if (routingConsumerChannel || isRoutingStarting || routingStartTimer) return;
+
+  routingStartTimer = setTimeout(async () => {
+    routingStartTimer = null;
+
+    try {
+      await startRoutingEngine();
+    } catch (err) {
+      isRoutingStarting = false;
+      console.error(`Failed to start routing engine: ${err.message}`);
+      scheduleRoutingEngineStart(ROUTING_RETRY_MS);
     }
-
-    if (!deptId) {
-      console.error(`No department found for category ${mlCategory}, complaint ${complaint_id}`);
-      return;
-    }
-
-    // ── Step 3: Find least-loaded officer ────────────────────────────────
-    const { rows: officerRows } = await pool.query(
-      `SELECT u.id, COUNT(t.id) AS open_tasks
-       FROM users u
-       LEFT JOIN tasks t
-         ON t.assigned_to = u.id
-         AND t.status NOT IN ('resolved', 'closed')
-       WHERE u.dept_id = $1
-         AND u.role IN ('officer', 'dept_head')
-         AND u.is_active = true
-       GROUP BY u.id
-       ORDER BY open_tasks ASC
-       LIMIT 1`,
-      [deptId]
-    );
-
-    const assignedTo = officerRows[0]?.id || null;
-    const deadline   = slaDeadline(priority);
-
-    // ── Step 4: Insert Task ───────────────────────────────────────────────
-    const { rows: [task] } = await pool.query(
-      `INSERT INTO tasks
-         (id, complaint_id, dept_id, assigned_to, is_primary,
-          status, sla_deadline, created_at, updated_at)
-       VALUES
-         (gen_random_uuid(), $1, $2, $3, true,
-          'open', $4, now(), now())
-       RETURNING id`,
-      [complaint_id, deptId, assignedTo, deadline]
-    );
-
-    // ── Step 5: Update complaint ──────────────────────────────────────────
-    await pool.query(
-      `UPDATE complaints
-       SET dept_id = $1, assigned_to = $2, status = 'assigned',
-           sla_deadline = $3, priority = $4, updated_at = now()
-       WHERE id = $5`,
-      [deptId, assignedTo, deadline, priority, complaint_id]
-    );
-
-    // ── Step 6: Audit trail ───────────────────────────────────────────────
-    await pool.query(
-      `INSERT INTO complaint_history
-         (id, complaint_id, actor_id, action, old_status, new_status, note, created_at)
-       VALUES
-         (gen_random_uuid(), $1, $2, 'assigned', 'pending', 'assigned', $3, now())`,
-      [complaint_id, assignedTo, `ML routed to dept ${deptId} (category: ${mlCategory}, priority: ${priority})`]
-    );
-
-    // ── Step 7: Publish task.created ──────────────────────────────────────
-    await publish(QUEUES.TASK_CREATED, {
-      task_id:      task.id,
-      complaint_id,
-      officer_id:   assignedTo,
-      dept_id:      deptId,
-      sla_deadline: deadline,
-    });
-
-    broadcast({
-      type:         'task.assigned',
-      task_id:      task.id,
-      complaint_id,
-      officer_id:   assignedTo,
-      dept_id:      deptId,
-    });
-
-    // ── Step 8: WebSocket broadcast ───────────────────────────────────────
-    broadcast({
-      type:         'complaint.status_updated',
-      complaint_id,
-      citizen_id,
-      new_status:   'assigned',
-      dept_id:      deptId,
-    });
-
-    console.log(`Routed complaint ${complaint_id} → dept ${deptId} (ML category: ${mlCategory}, priority: ${priority}), officer ${assignedTo}`);
-  });
-
-  console.log('Routing engine started');
+  }, delayMs);
 }
 
 // ── SLA escalation cron ───────────────────────────────────────────────────────
@@ -250,12 +432,6 @@ cron.schedule('*/15 * * * *', async () => {
   }
 });
 
-(async () => {
-  try {
-    await startRoutingEngine();
-  } catch (err) {
-    console.error('Failed to start routing engine:', err.message);
-  }
-})();
+scheduleRoutingEngineStart();
 
 module.exports = router;

@@ -4,7 +4,7 @@ const axios    = require('axios');
 const { requireRole } = require('../auth/auth');
 const pool     = require('../db/db');
 const { broadcast }  = require('../notifications/notifications');
-const amqplib  = require('amqplib');
+const { publish, QUEUES } = require('../../rabbitmq');
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -40,23 +40,17 @@ function computeSLADeadline(priority) {
 }
 
 async function publishToQueue(payload) {
-  try {
-    const conn    = await amqplib.connect(process.env.RABBITMQ_URL);
-    const channel = await conn.createChannel();
-    await channel.assertQueue('complaint.submitted', {
-      durable: true,
-      arguments: { 'x-message-ttl': 86400000 }
-    });
-    channel.sendToQueue(
-      'complaint.submitted',
-      Buffer.from(JSON.stringify(payload)),
-      { persistent: true }
-    );
-    await channel.close();
-    await conn.close();
-  } catch (err) {
-    console.error('RabbitMQ publish error', err.message);
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const published = await publish(QUEUES.SUBMITTED, payload);
+    if (published) return true;
+
+    await new Promise((resolve) => setTimeout(resolve, attempt * 250));
   }
+
+  console.error('RabbitMQ publish error: failed to enqueue complaint.submitted after retries');
+  return false;
 }
 
 async function createSecondaryTasks(complaintId, secondaryIssues, slaPriority) {
@@ -255,7 +249,7 @@ router.post('/', requireRole('citizen'), async (req, res) => {
     );
 
     // ── Step 9: Publish to RabbitMQ ───────────────────────────────────────
-    publishToQueue({
+    const queued = await publishToQueue({
       complaint_id: complaint.id,
       citizen_id: citizenId,
       category,
@@ -267,6 +261,16 @@ router.post('/', requireRole('citizen'), async (req, res) => {
       ward_id:     wardId,
       source,
     });
+
+    if (!queued) {
+      await pool.query(
+        `INSERT INTO complaint_history
+           (id, complaint_id, actor_id, action, old_status, new_status, note, created_at)
+         VALUES
+           (gen_random_uuid(), $1, $2, 'routing_enqueue_failed', 'pending', 'pending', $3, now())`,
+        [complaint.id, citizenId, 'Complaint accepted but assignment queue publish failed']
+      );
+    }
 
     // ── Step 9b: Broadcast to WebSocket listeners ─────────────────────────
     broadcast({
