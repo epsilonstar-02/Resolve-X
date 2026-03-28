@@ -185,6 +185,8 @@ export default function TrackComplaint() {
         </div>
       )}
  
+      {/* CSAT — only when resolved and not yet submitted */}
+      {isResolved && !csatSubmitted && token && (
         <div className="bg-[var(--secondary-dark)] border border-white/5 rounded-2xl p-4 mb-6 shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
           <h3 className="text-sm font-semibold text-white mb-3 tracking-tight">
             How was your experience?
