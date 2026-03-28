@@ -53,10 +53,12 @@ export default function ComplaintFilingWizard() {
   const [complaintId, setComplaintId] = useState<string | null>(null);
   const [slaDeadline, setSlaDeadline] = useState<string | null>(null);
   const [, setSecondaryIssues] = useState<SecondaryIssue[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   // ── Screen 1: Category ──────────────────────────────────────────────────────
 
-  const Screen1 = () => (
+  const renderScreen1 = () => (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold text-white">What is the issue?</h2>
       <p className="text-sm text-[var(--grey-text-dark)]">Select a category to continue</p>
@@ -86,7 +88,7 @@ export default function ComplaintFilingWizard() {
 
   // ── Screen 2: Location ──────────────────────────────────────────────────────
 
-  const Screen2 = () => {
+  const renderScreen2 = () => {
     const defaultCenter = DEMO_MODE
       ? DEMO_CENTER
       : { lat: latitude || 28.6100, lng: longitude || 77.2090 };
@@ -126,9 +128,7 @@ export default function ComplaintFilingWizard() {
 
   // ── Screen 3: Evidence + IssueAnalysisCard ──────────────────────────────────
 
-  const Screen3 = () => {
-    const [uploading, setUploading] = useState(false);
-    const fileRef = useRef<HTMLInputElement>(null);
+  const renderScreen3 = () => {
     const handleUpload = async (files: FileList) => {
       if (!files.length) return;
       if (fileUrls.length >= 3) {
@@ -195,15 +195,25 @@ export default function ComplaintFilingWizard() {
           onChange={e => e.target.files && handleUpload(e.target.files)}
         />
 
-        {/* Uploaded file chips */}
+        {/* Uploaded file previews */}
         {fileUrls.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {fileUrls.map((url, i) => (
-              <span key={i}
-                className="text-xs bg-emerald-950 text-emerald-300 border border-emerald-800 px-3 py-1 rounded-full">
-                File {i + 1} ✓
-              </span>
-            ))}
+          <div className="flex flex-wrap gap-3 mt-2">
+            {fileUrls.map((url, i) => {
+              const isVideo = url.match(/\.(mp4|webm|mov)$/i);
+              return (
+                <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/20 bg-black/50">
+                  {isVideo ? (
+                    <video src={url} className="w-full h-full object-cover pointer-events-none" muted playsInline />
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={url} alt={`Evidence ${i + 1}`} className="w-full h-full object-cover" />
+                  )}
+                  <div className="absolute top-1 right-1 bg-emerald-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] shadow-sm">
+                    ✓
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
 
@@ -237,7 +247,7 @@ export default function ComplaintFilingWizard() {
 
   // ── Screen 4: Description + Review ─────────────────────────────────────────
 
-  const Screen4 = () => {
+  const renderScreen4 = () => {
     const selectedCat = CATEGORIES.find(c => c.id === category);
 
     // SLA estimate based on category priority
@@ -300,7 +310,7 @@ export default function ComplaintFilingWizard() {
 
   // ── Screen 5: Confirmation ──────────────────────────────────────────────────
 
-  const Screen5 = () => (
+  const renderScreen5 = () => (
     <div className="space-y-6 text-center">
       <div className="flex justify-center">
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
@@ -426,11 +436,11 @@ export default function ComplaintFilingWizard() {
 
         {error && step !== 4 && <ErrorBanner message={error} />}
 
-        {step === 1 && <Screen1 />}
-        {step === 2 && <Screen2 />}
-        {step === 3 && <Screen3 />}
-        {step === 4 && <Screen4 />}
-        {step === 5 && <Screen5 />}
+        {step === 1 && renderScreen1()}
+        {step === 2 && renderScreen2()}
+        {step === 3 && renderScreen3()}
+        {step === 4 && renderScreen4()}
+        {step === 5 && renderScreen5()}
       </div>
     </main>
   );
