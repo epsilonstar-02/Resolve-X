@@ -111,7 +111,17 @@ INSERT INTO users (id, name, role, dept_id, ward_id, city_id, email, employee_id
   (gen_random_uuid(),'Officer Sanitation 1', 'officer','a0000000-0000-0000-0000-000000000005','DEMO_WARD','DELHI','officer.sanitation1@resolvex.in','DELHI-DW-SAN-001',    true,'$2b$10$jMf/4lzgKTr35KkjQ8jOVO03S.g8cjYIDb4pqdlyO4DW.dzHuDKyu','JBSWY3DPEHPK3PXP'),
   (gen_random_uuid(),'Officer Sanitation 2', 'officer','a0000000-0000-0000-0000-000000000005','W22',      'DELHI','officer.sanitation2@resolvex.in','DELHI-W22-SAN-002',   true,'$2b$10$jMf/4lzgKTr35KkjQ8jOVO03S.g8cjYIDb4pqdlyO4DW.dzHuDKyu','JBSWY3DPEHPK3PXP'),
   (gen_random_uuid(),'Officer General 1',    'officer','a0000000-0000-0000-0000-000000000006','W14',      'DELHI','officer.general1@resolvex.in',   'DELHI-W14-GEN-001',   true,'$2b$10$jMf/4lzgKTr35KkjQ8jOVO03S.g8cjYIDb4pqdlyO4DW.dzHuDKyu','JBSWY3DPEHPK3PXP'),
-  (gen_random_uuid(),'Officer General 2',    'officer','a0000000-0000-0000-0000-000000000006','DEMO_WARD','DELHI','officer.general2@resolvex.in',   'DELHI-DW-GEN-002',    true,'$2b$10$jMf/4lzgKTr35KkjQ8jOVO03S.g8cjYIDb4pqdlyO4DW.dzHuDKyu','JBSWY3DPEHPK3PXP');
+  (gen_random_uuid(),'Officer General 2',    'officer','a0000000-0000-0000-0000-000000000006','DEMO_WARD','DELHI','officer.general2@resolvex.in',   'DELHI-DW-GEN-002',    true,'$2b$10$jMf/4lzgKTr35KkjQ8jOVO03S.g8cjYIDb4pqdlyO4DW.dzHuDKyu','JBSWY3DPEHPK3PXP')
+ON CONFLICT (email) DO UPDATE SET
+  name          = EXCLUDED.name,
+  role          = EXCLUDED.role,
+  dept_id       = EXCLUDED.dept_id,
+  ward_id       = EXCLUDED.ward_id,
+  city_id       = EXCLUDED.city_id,
+  employee_id   = EXCLUDED.employee_id,
+  is_active     = EXCLUDED.is_active,
+  password_hash = EXCLUDED.password_hash,
+  totp_secret   = EXCLUDED.totp_secret;
 
 -- ── 60 Seed Complaints with real GPS coordinates ──────────────────────────────
 -- All: source='production', officer_verified=true → solid markers on map
