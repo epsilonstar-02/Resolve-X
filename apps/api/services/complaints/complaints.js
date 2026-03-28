@@ -43,7 +43,10 @@ async function publishToQueue(payload) {
   try {
     const conn    = await amqplib.connect(process.env.RABBITMQ_URL);
     const channel = await conn.createChannel();
-    await channel.assertQueue('complaint.submitted', { durable: true });
+    await channel.assertQueue('complaint.submitted', {
+      durable: true,
+      arguments: { 'x-message-ttl': 86400000 }
+    });
     channel.sendToQueue(
       'complaint.submitted',
       Buffer.from(JSON.stringify(payload)),

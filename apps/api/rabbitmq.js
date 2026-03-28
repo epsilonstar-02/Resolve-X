@@ -107,7 +107,10 @@ async function createConsumer(queueName, handler) {
   }
 
   const channel = await connection.createChannel();
-  await channel.assertQueue(queueName, { durable: true });
+  await channel.assertQueue(queueName, {
+    durable: true,
+    arguments: { 'x-message-ttl': 86400000 }
+  });
   await channel.prefetch(10);
 
   await channel.consume(queueName, async (msg) => {

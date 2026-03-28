@@ -67,7 +67,7 @@ function MapLegend({ hasClusters }: { hasClusters: boolean }) {
       onAdd() {
         const div = L.DomUtil.create('div');
         div.style.cssText = `
-          background: white; padding: 10px 14px; border-radius: 8px;
+          background: white; color: #1e293b; padding: 10px 14px; border-radius: 8px;
           box-shadow: 0 1px 4px rgba(0,0,0,0.15); font-size: 11px;
           line-height: 1.8; min-width: 160px;
         `;
