@@ -12,12 +12,12 @@ const DEMO_MODE = process.env.NEXT_PUBLIC_MODE === 'demo';
 const BASE      = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  pending:     { label: 'Pending',     color: 'text-[var(--grey-text-light)]',   bg: 'bg-slate-100'   },
-  assigned:    { label: 'Assigned',    color: 'text-blue-700',    bg: 'bg-blue-50'     },
-  in_progress: { label: 'In Progress', color: 'text-blue-800',    bg: 'bg-blue-100'    },
-  escalated:   { label: 'Escalated',   color: 'text-red-700',     bg: 'bg-red-50'      },
-  resolved:    { label: 'Resolved',    color: 'text-emerald-700', bg: 'bg-emerald-50'  },
-  closed:      { label: 'Closed',      color: 'text-[var(--grey-text-dark)]',   bg: 'bg-slate-100'   },
+  pending:     { label: 'Pending',     color: 'text-slate-300',     bg: 'bg-slate-500/20'   },
+  assigned:    { label: 'Assigned',    color: 'text-blue-300',      bg: 'bg-blue-500/20'    },
+  in_progress: { label: 'In Progress', color: 'text-blue-300',      bg: 'bg-blue-500/20'    },
+  escalated:   { label: 'Escalated',   color: 'text-red-300',       bg: 'bg-red-500/20'     },
+  resolved:    { label: 'Resolved',    color: 'text-emerald-300',   bg: 'bg-emerald-500/20' },
+  closed:      { label: 'Closed',      color: 'text-slate-400',     bg: 'bg-slate-500/20'   },
 };
 
 const CATEGORY_ICONS: Record<string, string> = {

@@ -111,22 +111,22 @@ export default function IssueAnalysisCard({ category, latitude, longitude, image
   // ── Duplicate detected ────────────────────────────────────────────────────────
   if (status === 'duplicate') {
     return (
-      <div className="border border-amber-200 rounded-xl overflow-hidden text-sm bg-amber-50">
-        <div className="px-4 py-2 bg-amber-100 border-b border-amber-200 flex items-center gap-2">
-          <span className="text-amber-600 text-base">⚠️</span>
-          <span className="text-xs font-semibold text-amber-700 uppercase tracking-wider">
+      <div className="border border-amber-900/50 rounded-2xl overflow-hidden text-sm bg-amber-950/20 shadow-lg">
+        <div className="px-4 py-2 bg-amber-900/40 border-b border-amber-900/50 flex items-center gap-2">
+          <span className="text-amber-400 text-base">⚠️</span>
+          <span className="text-[10px] font-bold text-amber-300 uppercase tracking-widest">
             Similar complaint detected nearby
           </span>
         </div>
-        <div className="px-4 py-3 text-amber-800 text-sm">
+        <div className="px-4 py-3 text-amber-200">
           A complaint has already been filed for a very similar issue at this location.
           {parentId && (
-            <span className="block mt-1 text-xs text-amber-600 font-mono truncate">
+            <span className="block mt-1 text-[10px] text-amber-400/70 font-mono truncate">
               Ref: {parentId}
             </span>
           )}
         </div>
-        <div className="px-4 py-2.5 bg-amber-50 text-xs text-amber-600">
+        <div className="px-4 py-2.5 bg-amber-950/40 text-[10px] text-amber-400 font-medium">
           You can still continue — your complaint will be linked to the existing report.
         </div>
       </div>
@@ -136,23 +136,23 @@ export default function IssueAnalysisCard({ category, latitude, longitude, image
   // ── Loading skeleton ──────────────────────────────────────────────────────────
   if (status === 'loading') {
     return (
-      <div className="border border-gray-200 rounded-xl overflow-hidden text-sm">
-        <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
-          <span className="inline-block w-3 h-3 rounded-full bg-indigo-400 animate-pulse" />
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+      <div className="border border-white/5 rounded-2xl overflow-hidden text-sm bg-[var(--secondary-dark)] shadow-xl">
+        <div className="px-4 py-3 bg-white/[0.03] border-b border-white/5 flex items-center gap-2">
+          <span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
+          <span className="text-[10px] font-bold text-[var(--grey-text-dark)] uppercase tracking-widest">
             AI Analysing…
           </span>
         </div>
-        <div className="px-4 py-3 space-y-3">
+        <div className="px-4 py-4 space-y-4">
           {[80, 60, 70].map((w, i) => (
-            <div key={i} className="space-y-1.5">
-              <div className={`h-3 bg-gray-200 rounded animate-pulse`} style={{ width: `${w}%` }} />
-              <div className="h-1.5 bg-gray-100 rounded-full animate-pulse w-full" />
+            <div key={i} className="space-y-2">
+              <div className="h-2.5 bg-white/5 rounded-full animate-pulse" style={{ width: `${w}%` }} />
+              <div className="h-1 bg-white/[0.03] rounded-full animate-pulse w-full" />
             </div>
           ))}
         </div>
-        <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-100">
-          <div className="h-2.5 bg-gray-200 rounded animate-pulse w-48" />
+        <div className="px-4 py-3 bg-white/[0.03] border-t border-white/5">
+          <div className="h-2 bg-white/5 rounded animate-pulse w-48" />
         </div>
       </div>
     );
@@ -165,32 +165,32 @@ export default function IssueAnalysisCard({ category, latitude, longitude, image
     const totalDepts = 1 + new Set(secondaries.map(s => s.category)).size;
 
     return (
-      <div className="border border-gray-200 rounded-xl overflow-hidden text-sm">
-        <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+      <div className="border border-white/5 rounded-2xl overflow-hidden text-sm bg-[var(--secondary-dark)] shadow-2xl">
+        <div className="px-4 py-3 bg-white/[0.03] border-b border-white/5 flex items-center gap-2">
+          <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+          <span className="text-[10px] font-bold text-white uppercase tracking-widest">
             AI Detected Issues
           </span>
-          <span className="ml-auto text-xs text-gray-400 font-normal">Live analysis</span>
+          <span className="ml-auto text-[10px] text-[var(--grey-text-dark)] font-medium">Live analysis</span>
         </div>
 
         {/* Primary issue */}
-        <div className="px-4 py-3 bg-indigo-50 border-b border-indigo-100">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="font-medium text-indigo-900">{primary.subcategory}</span>
-            <span className="text-xs text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">
+        <div className="px-4 py-4 bg-blue-500/5 border-b border-white/5">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-semibold text-white tracking-tight">{primary.subcategory}</span>
+            <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full uppercase tracking-tighter">
               Primary · P{primary.priority_score}
             </span>
           </div>
-          <p className="text-xs text-indigo-600 mb-1.5">{primary.category}</p>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 h-1.5 bg-indigo-100 rounded-full">
+          <p className="text-xs text-blue-300/70 mb-2 font-medium">{primary.category}</p>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
               <div
-                className="h-full bg-indigo-500 rounded-full transition-all duration-700"
+                className="h-full bg-blue-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]"
                 style={{ width: `${Math.round(primary.confidence * 100)}%` }}
               />
             </div>
-            <span className="text-xs text-indigo-600 w-8 text-right">
+            <span className="text-[10px] font-bold text-blue-400 w-8 text-right">
               {Math.round(primary.confidence * 100)}%
             </span>
           </div>
@@ -200,36 +200,36 @@ export default function IssueAnalysisCard({ category, latitude, longitude, image
         {secondaries.map((issue, i) => (
           <div
             key={i}
-            className="px-4 py-3 border-b border-amber-100 bg-amber-50"
+            className="px-4 py-4 border-b border-white/5 bg-amber-500/[0.02]"
             style={{
               opacity:   1,
               transform: 'translateY(0)',
-              animation: `fadeSlideIn 300ms ${i * 150}ms both`,
+              animation: `fadeSlideIn 400ms ${i * 150}ms both`,
             }}
           >
-            <p className="font-medium text-amber-900">{issue.risk_description}</p>
-            <p className="text-xs text-amber-600 mb-1.5">
-              AI Detected · Routed to {issue.category}
+            <p className="font-semibold text-white tracking-tight">{issue.risk_description}</p>
+            <p className="text-xs text-amber-300/70 mb-2 font-medium">
+              AI Detected · {issue.category}
             </p>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1.5 bg-amber-100 rounded-full">
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-amber-400 rounded-full"
+                  className="h-full bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.4)]"
                   style={{ width: `${Math.round(issue.confidence * 100)}%` }}
                 />
               </div>
-              <span className="text-xs text-amber-600 w-8 text-right">
+              <span className="text-[10px] font-bold text-amber-400 w-8 text-right">
                 {Math.round(issue.confidence * 100)}%
               </span>
             </div>
           </div>
         ))}
 
-        <div className="px-4 py-2.5 bg-gray-50 text-xs text-gray-500">
-          <span className="font-medium text-gray-700">
-            {totalDepts} department{totalDepts !== 1 ? 's' : ''} will be notified
+        <div className="px-4 py-3 bg-[var(--main-dark-bg)] text-[10px] text-[var(--grey-text-dark)] flex items-center gap-1.5 font-medium">
+          <span className="text-white">
+            {totalDepts} department{totalDepts !== 1 ? 's' : ''}
           </span>
-          {' · '}AI prediction · Departments alerted on submission
+          notified · AI prediction
         </div>
       </div>
     );
@@ -240,53 +240,53 @@ export default function IssueAnalysisCard({ category, latitude, longitude, image
   const totalDepts  = 1 + new Set(secondaries.map(s => s.dept)).size;
 
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden text-sm">
-      <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+    <div className="border border-white/5 rounded-2xl overflow-hidden text-sm bg-[var(--secondary-dark)] shadow-xl">
+      <div className="px-4 py-3 bg-white/[0.03] border-b border-white/5 flex items-center gap-2">
+        <span className="text-[10px] font-bold text-[var(--grey-text-dark)] uppercase tracking-widest">
           AI Issue Preview
         </span>
-        <span className="ml-2 text-xs text-gray-400 font-normal">Based on selected category</span>
-        <span className="ml-auto text-xs text-orange-400 font-normal">⚠ Offline estimate</span>
+        <span className="ml-2 text-[10px] text-[var(--grey-text-dark)] font-medium">Estimated intent</span>
+        <span className="ml-auto text-[10px] text-amber-400 font-bold">⚠ Offline preview</span>
       </div>
 
       {/* Primary (category-based) */}
-      <div className="px-4 py-3 bg-indigo-50 border-b border-indigo-100">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="font-medium text-indigo-900">
+      <div className="px-4 py-4 bg-blue-500/5 border-b border-white/5">
+        <div className="flex items-center justify-between mb-2">
+          <span className="font-semibold text-white tracking-tight">
             {CATEGORY_TO_CLASSIFIER[category] ?? category}
           </span>
-          <span className="text-xs text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">Primary</span>
+          <span className="text-[10px] font-bold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full uppercase tracking-tighter">Primary</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex-1 h-1.5 bg-indigo-100 rounded-full">
-            <div className="h-full bg-indigo-500 rounded-full w-full" />
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+            <div className="h-full bg-blue-500 rounded-full w-full shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
           </div>
-          <span className="text-xs text-indigo-600 w-8 text-right">100%</span>
+          <span className="text-[10px] font-bold text-blue-400 w-8 text-right">100%</span>
         </div>
       </div>
 
       {secondaries.map((issue, i) => (
-        <div key={issue.label} className="px-4 py-3 border-b border-amber-100 bg-amber-50">
-          <p className="font-medium text-amber-900">{issue.label}</p>
-          <p className="text-xs text-amber-600 mb-1.5">
+        <div key={issue.label} className="px-4 py-4 border-b border-white/5 bg-amber-500/[0.02]">
+          <p className="font-semibold text-white tracking-tight">{issue.label}</p>
+          <p className="text-xs text-amber-300/70 mb-2 font-medium">
             Estimated · Also routed to {issue.dept}
           </p>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 h-1.5 bg-amber-100 rounded-full">
-              <div className="h-full bg-amber-400 rounded-full" style={{ width: `${issue.confidence * 100}%` }} />
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+              <div className="h-full bg-amber-400 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.4)]" style={{ width: `${issue.confidence * 100}%` }} />
             </div>
-            <span className="text-xs text-amber-600 w-8 text-right">
+            <span className="text-[10px] font-bold text-amber-400 w-8 text-right">
               {Math.round(issue.confidence * 100)}%
             </span>
           </div>
         </div>
       ))}
 
-      <div className="px-4 py-2.5 bg-gray-50 text-xs text-gray-500">
-        <span className="font-medium text-gray-700">
-          {totalDepts} department{totalDepts !== 1 ? 's' : ''} will be notified
+      <div className="px-4 py-3 bg-[var(--main-dark-bg)] text-[10px] text-[var(--grey-text-dark)] flex items-center gap-1.5 font-medium">
+        <span className="text-white font-bold">
+          {totalDepts} department{totalDepts !== 1 ? 's' : ''}
         </span>
-        {' · '}AI prediction · Departments alerted on submission
+        notified · Intent estimation
       </div>
     </div>
   );

@@ -145,7 +145,7 @@ export default function OfficerTasks() {
             {[1,2,3].map(i => <div key={i} className="rounded-2xl border border-white/5 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.5)]  h-32 animate-pulse" />)}
           </div>
         ) : tasks.length === 0 ? (
-          <div className="rounded-2xl border border-white/5 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.5)]  p-8 text-center text-[var(--grey-text-dark)] text-sm">
+          <div className="rounded-2xl border border-white/5 bg-[var(--secondary-dark)] shadow-[0_8px_32px_rgba(0,0,0,0.5)]  p-8 text-center text-[var(--grey-text-light)] text-sm font-medium">
             No tasks assigned
           </div>
         ) : (
@@ -189,9 +189,9 @@ export default function OfficerTasks() {
                     <button
                       onClick={() => handleAction(task, 'in_progress')}
                       disabled={!!actionId}
-                      className="px-3 py-1.5 text-xs bg-blue-50 text-blue-800
-                                 rounded-lg hover:bg-blue-100 disabled:opacity-40
-                                 font-medium transition-colors"
+                      className="px-3 py-1.5 text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20
+                                 rounded-lg hover:bg-blue-500/20 disabled:opacity-40
+                                 font-semibold transition-all active:scale-95"
                     >
                       Start work
                     </button>
@@ -209,16 +209,16 @@ export default function OfficerTasks() {
                     <button
                       onClick={() => handleVerify(task)}
                       disabled={!!actionId}
-                      className="px-3 py-1.5 text-xs bg-amber-50 text-amber-700
-                                 rounded-lg hover:bg-amber-100 disabled:opacity-40
-                                 font-medium transition-colors"
+                      className="px-3 py-1.5 text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20
+                                 rounded-lg hover:bg-amber-500/20 disabled:opacity-40
+                                 font-semibold transition-all active:scale-95"
                     >
-                      Verified on ground
+                      Verify details
                     </button>
                   )}
                   <Link href="/admin/map"
-                    className="px-3 py-1.5 text-xs bg-slate-50 text-[var(--grey-text-light)]
-                               rounded-lg hover:bg-slate-100 font-medium transition-colors">
+                    className="px-3 py-1.5 text-xs bg-white/5 text-[var(--grey-text-light)] border border-white/10
+                               rounded-lg hover:bg-white/10 hover:text-white font-semibold transition-all active:scale-95">
                     View on map
                   </Link>
                 </div>

@@ -137,20 +137,20 @@ export default function TrackComplaint() {
       )}
  
       {/* Details */}
-      <div className="bg-slate-50 rounded-xl p-4 mb-6 space-y-2 text-sm">
+      <div className="bg-[var(--secondary-dark)] border border-white/5 rounded-2xl p-4 mb-6 space-y-2 text-sm shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
         <div className="flex justify-between">
-          <span className="text-slate-400">Category</span>
-          <span className="font-medium">{complaint?.category}</span>
+          <span className="text-[var(--grey-text-dark)]">Category</span>
+          <span className="font-medium text-white">{complaint?.category}</span>
         </div>
         {complaint?.ward_id && (
           <div className="flex justify-between">
-            <span className="text-slate-400">Ward</span>
-            <span className="font-medium">{complaint.ward_id}</span>
+            <span className="text-[var(--grey-text-dark)]">Ward</span>
+            <span className="font-medium text-white">{complaint.ward_id}</span>
           </div>
         )}
         <div className="flex justify-between">
-          <span className="text-slate-400">Filed</span>
-          <span className="font-medium">
+          <span className="text-[var(--grey-text-dark)]">Filed</span>
+          <span className="font-medium text-white">
             {complaint?.created_at
               ? new Date(complaint.created_at).toLocaleDateString('en-IN', {
                   day: 'numeric', month: 'short', year: 'numeric',
@@ -167,15 +167,15 @@ export default function TrackComplaint() {
           <ol className="relative border-l border-white/[0.06] ml-3 space-y-4">
             {history.map((entry: ComplaintHistoryEntry, i: number) => (
               <li key={i} className="ml-4">
-                <div className="absolute -left-1.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white" />
+                <div className="absolute -left-1.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[var(--main-dark-bg)] shadow-[0_0_8px_var(--emerald-500)]" />
                 <div className="text-sm">
-                  <p className="font-medium text-slate-800 capitalize">
+                  <p className="font-medium text-white capitalize">
                     {entry.action?.replace(/_/g, ' ')}
                   </p>
                   {entry.note && (
-                    <p className="text-slate-400 text-xs mt-0.5">{entry.note}</p>
+                    <p className="text-[var(--grey-text-light)] text-xs mt-0.5">{entry.note}</p>
                   )}
-                  <p className="text-slate-400 text-xs mt-0.5">
+                  <p className="text-[var(--grey-text-dark)] text-xs mt-0.5">
                     {new Date(entry.created_at).toLocaleString('en-IN')}
                   </p>
                 </div>
@@ -185,10 +185,8 @@ export default function TrackComplaint() {
         </div>
       )}
  
-      {/* CSAT — only when resolved and not yet submitted */}
-      {isResolved && !csatSubmitted && token && (
-        <div className="border border-white/[0.06] rounded-xl p-4 mb-6">
-          <h3 className="text-sm font-semibold text-slate-800 mb-3">
+        <div className="bg-[var(--secondary-dark)] border border-white/5 rounded-2xl p-4 mb-6 shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
+          <h3 className="text-sm font-semibold text-white mb-3 tracking-tight">
             How was your experience?
           </h3>
           <div className="flex gap-2 mb-3">

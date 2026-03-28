@@ -273,7 +273,7 @@ export default function ComplaintFilingWizard() {
           </div>
           <div className="flex justify-between">
             <span className="text-[var(--grey-text-dark)]">Expected SLA</span>
-            <span className="font-medium text-blue-800">{slaLabel}</span>
+            <span className="font-semibold text-blue-300">{slaLabel}</span>
           </div>
           {fileUrls.length > 0 && (
             <div className="flex justify-between">
@@ -332,7 +332,7 @@ export default function ComplaintFilingWizard() {
           {slaDeadline && (
             <div className="flex justify-between">
               <span className="text-[var(--grey-text-dark)]">Expected resolution</span>
-              <span className="font-medium text-blue-800">
+              <span className="font-medium text-blue-300">
                 {new Date(slaDeadline).toLocaleDateString('en-IN', {
                   day: 'numeric', month: 'short', year: 'numeric'
                 })}
@@ -483,8 +483,8 @@ function WizardNav({
 
 function ErrorBanner({ message }: { message: string }) {
   return (
-    <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
-      {message}
+    <div className="bg-red-950/20 border border-red-800/50 text-red-400 text-xs px-4 py-3 rounded-xl shadow-lg">
+      <span className="mr-1.5">⚠️</span> {message}
     </div>
   );
 }
